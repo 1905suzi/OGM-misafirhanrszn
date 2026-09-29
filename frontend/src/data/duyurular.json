@@ -1,0 +1,30 @@
+[
+  {
+    "id": "1",
+    "tur": "Duyuru",
+    "baslik": "2025 Yaz Rezervasyonları",
+    "icerik": "2025 yaz sezonu rezervasyonları başladı! Erken rezervasyon indirimi için hemen arayın.",
+    "tarih": "2024-08-01"
+  },
+  {
+    "id": "2",
+    "tur": "Bilgi",
+    "baslik": "Yeni Aile Odaları",
+    "icerik": "Yeni aile odaları Haziran 2025 itibarıyla hizmete girmiştir. Kapasite 100 odaya ulaşmıştır.",
+    "tarih": "2024-07-15"
+  },
+  {
+    "id": "3",
+    "tur": "Etkinlik",
+    "baslik": "Doğa Yürüyüşleri",
+    "icerik": "Yaz dönemi doğa yürüyüşleri ve piknik etkinlikleri programı açıklandı.",
+    "tarih": "2024-07-20"
+  },
+  {
+    "id": "4",
+    "tur": "Güncelleme",
+    "baslik": "Sistem Güncellemesi",
+    "icerik": "Online rezervasyon sistemi güncellendi. Artık daha kolay rezervasyon yapabilirsiniz.",
+    "tarih": "2024-07-25"
+  }
+]

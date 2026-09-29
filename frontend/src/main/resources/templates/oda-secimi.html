@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OGM Misafirhane - Oda Seçimi</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f6f8f7; overflow: hidden; }
+        .sidebar { width: 260px; background-color: #163a22; display: flex; flex-direction: column; color: white; z-index: 20; }
+        .sidebar-top { padding-top: 2rem; }
+        .logo-area { text-align: center; margin-bottom: 2rem; }
+        .logo-area img { width: 85px; height: 85px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .logo-area h2 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
+        .logo-area p { font-size: 0.8rem; color: #8bb197; margin-top: 2px; }
+        .menu { display: flex; flex-direction: column; gap: 5px; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: #a8c1b1; text-decoration: none; font-size: 0.95rem; transition: all 0.2s; }
+        .menu-item svg { width: 18px; height: 18px; fill: currentColor; }
+        .menu-item.active { background-color: #21472e; color: white; border-left: 4px solid #8fbc9f; }
+        .menu-item:hover:not(.active) { color: white; background-color: rgba(255,255,255,0.05); }
+        .sidebar-bottom { margin-top: auto; padding: 20px 20px 30px; }
+        .logout-btn { display: flex; align-items: center; gap: 10px; color: #d1dcd5; text-decoration: none; font-size: 0.95rem; }
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; }
+        .top-header { height: 70px; background: white; display: flex; justify-content: flex-end; align-items: center; padding: 0 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); z-index: 20; }
+        .user-profile { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; color: #333; }
+        .user-avatar { width: 32px; height: 32px; background-color: #163a22; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .content-body { flex: 1; padding: 3rem; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; overflow-y: auto;}
+        .info-banner { background: white; width: 100%; max-width: 900px; padding: 1.5rem 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); margin-bottom: 2rem; position: relative; z-index: 10; }
+        .info-banner h1 { font-size: 1.4rem; color: #111; margin-bottom: 6px; }
+        .info-banner p { font-size: 0.9rem; color: #555; }
+        .form-card { background: white; width: 100%; max-width: 900px; border-radius: 12px; padding: 2rem 2.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.04); position: relative; z-index: 10; }
+        .stepper-container { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 3.5rem; padding: 0 1rem; }
+        .step { display: flex; align-items: center; gap: 8px; color: #888; font-weight: 500; font-size: 1rem; }
+        .step.active { color: #1a3b25; font-weight: 600; }
+        .step svg { width: 22px; height: 22px; fill: currentColor; }
+        .step-line { flex: 1; height: 1px; background-color: #d1d5db; margin: 0 20px; }
+        .form-section-header h2 { font-size: 1.35rem; font-weight: 600; color: #1a3b25; margin-bottom: 6px; }
+        .form-section-header p { font-size: 0.9rem; color: #888; margin-bottom: 2rem; }
+
+        .room-card { border: 1px solid #eaeaea; border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; background: #fff; transition: all 0.2s; }
+        .room-card:hover { border-color: #bce3cc; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .room-info h3 { font-size: 1.15rem; color: #1a3b25; margin-bottom: 4px; }
+        .room-info p { font-size: 0.85rem; color: #666; margin-bottom: 12px; }
+        .room-features { display: flex; gap: 8px; font-size: 0.8rem; color: #444; }
+        .feature-badge { background: #f1f5f2; padding: 4px 10px; border-radius: 4px; border: 1px solid #e1e8e3; }
+
+        .room-action { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+        .room-price { font-size: 1.25rem; font-weight: 700; color: #1a3b25; }
+        .room-price span { font-size: 0.8rem; font-weight: normal; color: #777; }
+
+        /* Butonun Başlangıç ve Seçildi Halleri */
+        .btn-select-room { background-color: #f0f4f1; border: 1px solid #c2d6c7; color: #2b5e39; padding: 0.5rem 1.5rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-select-room:hover { background-color: #e2ede5; }
+        .btn-select-room.selected { background-color: #2b5e39; border-color: #2b5e39; color: white; }
+
+        .form-divider { border: none; border-top: 1px solid #eaeaea; margin: 2.5rem 0 1.5rem 0; }
+        .form-actions { display: flex; justify-content: space-between; align-items: center; }
+        .btn-back { background: white; border: 1px solid #ccc; color: #555; padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+        .btn-back:hover { background: #f0f0f0; }
+        .btn-next { background: #1a3b25; border: none; color: white; padding: 0.7rem 2.5rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+        .btn-next:hover { background: #122a1a; }
+        .tree-background { position: absolute; bottom: -20px; right: -20px; width: 550px; height: 800px; z-index: 0; pointer-events: none; overflow: hidden; filter: blur(10px) opacity(0.25); mix-blend-mode: multiply; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-top">
+        <div class="logo-area">
+            <img src="https://upload.wikimedia.org/wikipedia/tr/thumb/8/87/Orman_Genel_M%C3%BCd%C3%BCrl%C3%BC%C4%9F%C3%BC_logosu.png/240px-Orman_Genel_M%C3%BCd%C3%BCrl%C3%BC%C4%9F%C3%BC_logosu.png" alt="OGM Logo">
+            <h2>OGM MİSAFİRHANE</h2>
+            <p>Rezervasyon Portalı</p>
+        </div>
+        <div class="menu">
+            <a href="/dashboard" class="menu-item"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Ana Sayfa</a>
+            <a href="/rezervasyon-olustur" class="menu-item active"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V9H8v3H6v2h2v3h2v-3h2v-2z"/></svg> Rezervasyon Oluştur</a>
+            <a href="/rezervasyonlarim" class="menu-item"><svg viewBox="0 0 24 24"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z"/></svg> Rezervasyonlarım</a>
+            <a href="/iletisim" class="menu-item"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> İletişim</a>
+        </div>
+    </div>
+    <div class="sidebar-bottom">
+        <a href="/cikis" class="logout-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg> Çıkış Yap</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="top-header">
+        <div style="flex:1; font-weight:600; color:#1a3b25; font-size:1.1rem;">OGM Misafirhane Rezervasyon Portalı</div>
+        <div class="user-profile">
+            <div class="user-avatar"><svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-3 2c-2.67 0-8 1.34-8 4v2h16v-2c0-.42.09-.81.25-1.18-.75-.4-1.7-.68-2.85-.82H9zm11 0c-1.85 0-3.15 1.5-3.15 2.5 0 2 3.15 4.5 3.15 4.5s3.15-2.5 3.15-4.5c0-1-1.3-2.5-3.15-2.5z"/></svg></div>
+            <span>Hoş Geldiniz ˅</span>
+        </div>
+    </div>
+
+    <div class="content-body">
+        <div class="info-banner">
+            <h1>Yeni Rezervasyon Oluştur</h1>
+            <p>Bilgilerinizi adım adım doldurunuz</p>
+        </div>
+
+        <div class="form-card">
+
+            <div class="stepper-container">
+                <div class="step"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg><span>Konaklama</span></div>
+                <div class="step-line"></div>
+                <div class="step active"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Oda Seçimi</span></div>
+                <div class="step-line"></div>
+                <div class="step"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg><span>Ön İzleme</span></div>
+                <div class="step-line"></div>
+                <div class="step"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg><span>Ödeme</span></div>
+            </div>
+
+            <div class="form-section-header">
+                <h2>Oda Seçimi</h2>
+                <p>Tarihlere uygun, müsait odalardan birini seçin.</p>
+            </div>
+
+            <!-- ODA SEÇİM FORMÜLASYONU -->
+            <form action="/on-izleme" method="get">
+
+                <!-- Standart Oda -->
+                <div class="room-card">
+                    <div class="room-info">
+                        <h3>Oda 101 - Standart Oda</h3>
+                        <p>Tek kişilik yatak, klima, TV ve mini bar imkanı.</p>
+                        <div class="room-features">
+                            <span class="feature-badge">1 Yetişkin</span>
+                            <span class="feature-badge">18 m²</span>
+                        </div>
+                    </div>
+                    <div class="room-action">
+                        <div class="room-price" th:text="'₺' + ${fiyatStandart}">₺1000 <span>/ gece</span></div>
+                        <button type="button" class="btn-select-room" onclick="odaSec('Standart', this)">Seç</button>
+                    </div>
+                </div>
+
+                <!-- Suit Oda -->
+                <div class="room-card">
+                    <div class="room-info">
+                        <h3>Oda 102 - Suit Oda</h3>
+                        <p>Geniş çift kişilik yatak, oturma alanı ve özel manzaralı.</p>
+                        <div class="room-features">
+                            <span class="feature-badge">2 Yetişkin</span>
+                            <span class="feature-badge">28 m²</span>
+                        </div>
+                    </div>
+                    <div class="room-action">
+                        <div class="room-price" th:text="'₺' + ${fiyatSuit}">₺1800 <span>/ gece</span></div>
+                        <button type="button" class="btn-select-room" onclick="odaSec('Suit', this)">Seç</button>
+                    </div>
+                </div>
+
+                <!-- Aile Odası -->
+                <div class="room-card">
+                    <div class="room-info">
+                        <h3>Oda 103 - Aile Odası</h3>
+                        <p>Çok yataklı, aileler için özel konforlu geniş oda.</p>
+                        <div class="room-features">
+                            <span class="feature-badge">3+ Kişilik</span>
+                            <span class="feature-badge">40 m²</span>
+                        </div>
+                    </div>
+                    <div class="room-action">
+                        <div class="room-price" th:text="'₺' + ${fiyatAile}">₺2500 <span>/ gece</span></div>
+                        <button type="button" class="btn-select-room" onclick="odaSec('Aile', this)">Seç</button>
+                    </div>
+                </div>
+
+                <!-- Gizli input ile seçilen oda arkaya gönderilir -->
+                <input type="hidden" name="oda" id="secilenOdaInput" th:value="${seciliOdaTipi}">
+
+                <hr class="form-divider">
+                <div class="form-actions">
+                    <a th:href="@{/konaklama}" class="btn-back">← Geri</a>
+                    <button type="submit" class="btn-next">Ön İzlemeye Geç →</button>
+                </div>
+            </form>
+
+        </div>
+
+        <svg class="tree-background" viewBox="0 0 500 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M320 800V420L295 450L275 410L250 450L220 395L190 440L150 380L110 450L70 370L20 480V800H320Z" fill="#7fa98c"/>
+            <path d="M420 800V310L395 345L375 305L350 345L325 290L295 335L260 270L220 340L180 260L130 360L80 430V800H420Z" fill="#699677"/>
+            <path d="M480 800V240L455 275L435 235L410 275L385 220L355 265L320 200L280 270L240 190L190 290L140 370L100 450L70 520V800H480Z" fill="#588566"/>
+            <path d="M500 800V150L465 200L435 145L400 195L365 130L325 185L285 110L235 190L185 100L130 210L80 310L40 400L20 500V800H500Z" fill="#477355"/>
+        </svg>
+    </div>
+</div>
+
+<!-- JAVASCRIPT: Kullanıcı bizzat tıklamadan hiçbir oda seçili gelmez -->
+<script>
+    // Sayfa açıldığında daha önceden session'da kayıtlı bir oda varsa onu işaretle
+    window.onload = function() {
+        const kayitliOda = document.getElementById('secilenOdaInput').value;
+        if (kayitliOda) {
+            const butonlar = document.querySelectorAll('.btn-select-room');
+            butonlar.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(kayitliOda)) {
+                    btn.classList.add('selected');
+                    btn.innerText = "Seçildi ✓";
+                }
+            });
+        }
+    };
+
+    function odaSec(odaTipi, element) {
+        // Tüm butonların seçimini sıfırla
+        const butonlar = document.querySelectorAll('.btn-select-room');
+        butonlar.forEach(btn => {
+            btn.classList.remove('selected');
+            btn.innerText = "Seç";
+        });
+
+        // Tıklanan butonu yeşil "Seçildi" yap
+        element.classList.add('selected');
+        element.innerText = "Seçildi ✓";
+
+        // Arka plandaki gizli inputa değeri ata
+        document.getElementById('secilenOdaInput').value = odaTipi;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>OGM Misafirhane - Giriş</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { display: flex; height: 100vh; background-color: #f6f8f7; overflow: hidden; }
+
+    /* SIDEBAR */
+    .sidebar { width: 260px; background-color: #163a22; display: flex; flex-direction: column; color: white; z-index: 20; }
+    .sidebar-top { padding-top: 2rem; }
+    .logo-area { text-align: center; margin-bottom: 2rem; }
+    .logo-area img { width: 85px; height: 85px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .logo-area h2 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
+    .logo-area p { font-size: 0.8rem; color: #8bb197; margin-top: 2px; }
+    .menu { display: flex; flex-direction: column; gap: 5px; }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: #a8c1b1; text-decoration: none; font-size: 0.95rem; transition: all 0.2s; }
+    .menu-item svg { width: 18px; height: 18px; fill: currentColor; }
+    .menu-item.active { background-color: #21472e; color: white; border-left: 4px solid #8fbc9f; }
+    .menu-item:hover:not(.active) { color: white; background-color: rgba(255,255,255,0.05); }
+    .sidebar-bottom { margin-top: auto; padding: 20px 20px 30px; }
+
+    /* ANA İÇERİK */
+    .main-content { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; }
+    .top-header { height: 70px; background: white; display: flex; justify-content: flex-end; align-items: center; padding: 0 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); z-index: 20; }
+    .user-profile { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; color: #333; }
+    .user-avatar { width: 32px; height: 32px; background-color: #163a22; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .content-body { flex: 1; padding: 3rem; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; overflow-y: auto; }
+
+    /* BANNER */
+    .info-banner { background: white; width: 100%; max-width: 900px; padding: 1.5rem 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); margin-bottom: 2.5rem; position: relative; z-index: 10; }
+    .info-banner h1 { font-size: 1.4rem; color: #111; margin-bottom: 6px; }
+    .info-banner p { font-size: 0.9rem; color: #555; }
+
+    /* KARTLAR */
+    .cards-container { display: flex; gap: 20px; width: 100%; max-width: 900px; justify-content: space-between; position: relative; z-index: 10; transition: all 0.35s ease; }
+    .selection-card { background: white; flex: 1; border-radius: 8px; padding: 2.5rem 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-left: 5px solid #2b5e39; border-top: 1px solid #eaeaea; border-right: 1px solid #eaeaea; border-bottom: 1px solid #eaeaea; display: flex; flex-direction: column; align-items: center; transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.3s; cursor: pointer; }
+    .selection-card:hover { transform: translateY(-12px) scale(1.02); box-shadow: 0 20px 30px rgba(0,0,0,0.08); border-left: 5px solid #1a4225; }
+    .selection-card.highlight { border: 2px solid #bce3cc; border-left: 5px solid #2b5e39; box-shadow: 0 6px 20px rgba(22,58,34,0.08); background-color: #fcfffd; }
+    .selection-card.highlight:hover { box-shadow: 0 20px 35px rgba(22,58,34,0.15); }
+    .card-icon svg { width: 65px; height: 65px; fill: #437652; margin-bottom: 1.2rem; transition: transform 0.3s ease; }
+    .selection-card:hover .card-icon svg { transform: scale(1.1); }
+    .selection-card h3 { font-size: 1.15rem; color: #222; margin-bottom: 8px; font-weight: 600; }
+    .selection-card p { font-size: 0.85rem; color: #666; line-height: 1.4; margin-bottom: 2rem; min-height: 40px; }
+    .select-btn { background-color: #3b6b4a; color: white; border: none; padding: 0.6rem 1.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 0.3s; }
+    .select-btn:hover { background-color: #2b5e39; }
+
+    /* KAYIT OL BUTONU */
+    .register-row { display: flex; justify-content: center; margin-top: 1.6rem; position: relative; z-index: 10; }
+    .register-main-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent;
+      color: #2b5e39;
+      border: 2px solid #2b5e39;
+      padding: 0.65rem 2.2rem;
+      border-radius: 50px;
+      font-size: 0.92rem; font-weight: 600;
+      text-decoration: none; cursor: pointer;
+      transition: background 0.25s, color 0.25s, transform 0.2s, box-shadow 0.25s;
+      letter-spacing: 0.3px;
+    }
+    .register-main-btn svg { width: 16px; height: 16px; fill: currentColor; transition: fill 0.25s; }
+    .register-main-btn:hover {
+      background: #2b5e39; color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(43,94,57,0.25);
+    }
+
+    /* GİRİŞ FORMU (e-posta + şifre) */
+    .login-form-section {
+      display: none;
+      width: 100%; max-width: 440px;
+      position: relative; z-index: 10;
+      animation: fadeSlideIn 0.35s ease;
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .login-form-card {
+      background: white; border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border: 1px solid #eaeaea;
+    }
+    .login-form-header {
+      background: #163a22; padding: 1.4rem 1.8rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .login-form-header-left { display: flex; align-items: center; gap: 12px; }
+    .login-role-icon { width: 38px; height: 38px; background: rgba(255,255,255,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .login-role-icon svg { width: 20px; height: 20px; fill: white; }
+    .login-form-header h2 { font-size: 1rem; font-weight: 700; color: white; margin: 0; }
+    .login-form-header p { font-size: 0.75rem; color: rgba(255,255,255,0.55); margin: 0; }
+    .btn-back-header {
+      background: rgba(255,255,255,0.1); border: none; color: rgba(255,255,255,0.75);
+      padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; cursor: pointer;
+      transition: background 0.2s; white-space: nowrap;
+    }
+    .btn-back-header:hover { background: rgba(255,255,255,0.2); color: white; }
+
+    .login-form-body { padding: 1.8rem; }
+    .lf-group { margin-bottom: 1.15rem; }
+    .lf-group label { display: block; font-size: 0.83rem; font-weight: 600; color: #444; margin-bottom: 6px; }
+    .lf-group input {
+      width: 100%; padding: 0.72rem 1rem;
+      border: 1.5px solid #e0e0e0; border-radius: 8px;
+      font-size: 0.9rem; color: #222; background: #fafafa;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .lf-group input:focus { border-color: #2b5e39; box-shadow: 0 0 0 3px rgba(43,94,57,0.1); background: white; }
+    .pass-wrap { position: relative; }
+    .pass-wrap input { padding-right: 2.8rem; }
+    .toggle-pass-btn {
+      position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #aaa; font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .toggle-pass-btn:hover { color: #2b5e39; }
+    .btn-login-submit {
+      width: 100%; padding: 0.8rem; margin-top: 0.5rem;
+      background: #1e4829; color: white; border: none; border-radius: 8px;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: background 0.25s, transform 0.15s;
+    }
+    .btn-login-submit:hover { background: #163a22; transform: translateY(-1px); }
+
+    /* AĞAÇ ARKA PLAN */
+    .tree-background { position: absolute; bottom: -20px; right: -20px; width: 550px; height: 800px; z-index: 0; pointer-events: none; overflow: hidden; filter: blur(10px) opacity(0.25); mix-blend-mode: multiply; }
+  </style>
+</head>
+<body>
+
+<!-- SOL SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-top">
+    <div class="logo-area">
+      <img th:src="@{/images/ogm-logo.png}" alt="OGM Logo">
+      <h2>OGM MİSAFİRHANE</h2>
+      <p>Rezervasyon Portalı</p>
+    </div>
+    <div class="menu">
+      <a href="/giris" class="menu-item active">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        Ana Sayfa
+      </a>
+      <a href="/iletisim" class="menu-item">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        İletişim
+      </a>
+    </div>
+  </div>
+  <div class="sidebar-bottom"></div>
+</div>
+
+<!-- SAĞ İÇERİK -->
+<div class="main-content">
+  <div class="top-header">
+    <div class="user-profile">
+      <div class="user-avatar">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      </div>
+      <span>Hoş Geldiniz ˅</span>
+    </div>
+  </div>
+
+  <div class="content-body">
+
+    <div class="info-banner">
+      <h1 id="bannerTitle">Giriş Türünü Seçiniz</h1>
+      <p id="bannerDesc">Rezervasyon oluşturmak için giriş türünüzü seçiniz</p>
+    </div>
+
+    <!-- KARTLAR -->
+    <div class="cards-container" id="cardsSection">
+
+      <!-- Misafir -->
+      <div class="selection-card" onclick="showLoginForm('Misafir', 'M 12 12 c 2.21 0 4 -1.79 4 -4 s -1.79 -4 -4 -4 -4 1.79 -4 4 1.79 4 4 4 z m 0 2 c -2.67 0 -8 1.34 -8 4 v 2 h 16 v -2 c 0 -2.66 -5.33 -4 -8 -4 z', '/misafir-kayit')">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </div>
+        <h3>Misafir</h3>
+        <p>Dışarıdan misafir olarak giriş yapın</p>
+        <span class="select-btn">Seç →</span>
+      </div>
+
+      <!-- Personel Yakını -->
+      <div class="selection-card highlight" onclick="window.location.href='/personel-yakini-dogrulama'"style="cursor:pointer;">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-3 2c-2.67 0-8 1.34-8 4v2h16v-2c0-.42.09-.81.25-1.18-.75-.4-1.7-.68-2.85-.82H9zm11 0c-1.85 0-3.15 1.5-3.15 2.5 0 2 3.15 4.5 3.15 4.5s3.15-2.5 3.15-4.5c0-1-1.3-2.5-3.15-2.5z"/></svg>
+        </div>
+        <h3>Personel Yakını</h3>
+        <p>OGM personelinin yakını olarak giriş yapın</p>
+        <span class="select-btn">Seç →</span>
+      </div>
+
+      <!-- Personel -->
+      <div class="selection-card" onclick="showLoginForm('Personel', 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm4 12H8v-1c0-1.33 2.67-2 4-2s4 .67 4 2v1zm4-6h-4v-2h4v2zm0-4h-4V7h4v2z', '/personel-girisi')">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm4 12H8v-1c0-1.33 2.67-2 4-2s4 .67 4 2v1zm4-6h-4v-2h4v2zm0-4h-4V7h4v2z"/></svg>
+        </div>
+        <h3>Personel</h3>
+        <p>OGM personeli olarak giriş yapın</p>
+        <span class="select-btn">Seç →</span>
+      </div>
+
+    </div>
+
+    <!-- KAYIT OL BUTONU -->
+    <div class="register-row" id="registerRow">
+      <a href="/uye-ol" class="register-main-btn">
+        <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        Kayıt Ol
+      </a>
+    </div>
+
+    <!-- E-POSTA + ŞİFRE GİRİŞ FORMU (kartlar gizlenince çıkar) -->
+    <div class="login-form-section" id="loginFormSection">
+      <div class="login-form-card">
+
+        <!-- Başlık -->
+        <div class="login-form-header">
+          <div class="login-form-header-left">
+            <div class="login-role-icon">
+              <svg id="loginRoleIcon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+            <div>
+              <h2 id="loginRoleTitle">Misafir Girişi</h2>
+              <p>E-posta ve şifrenizle giriş yapın</p>
+            </div>
+          </div>
+          <button class="btn-back-header" onclick="showCards()">← Geri Dön</button>
+        </div>
+
+        <!-- Form -->
+        <div class="login-form-body">
+          <form id="loginEmailForm" novalidate>
+            <input type="hidden" id="loginTarget" value="/dashboard">
+
+            <div class="lf-group">
+              <label for="loginEmail">E-posta Adresi</label>
+              <input id="loginEmail" type="email" placeholder="ornek@ogm.gov.tr" autocomplete="email">
+            </div>
+
+            <div class="lf-group">
+              <label for="loginPassword">Şifre</label>
+              <div class="pass-wrap">
+                <input id="loginPassword" type="password" placeholder="Şifreniz" autocomplete="current-password">
+                <button type="button" class="toggle-pass-btn" onclick="togglePass()" aria-label="Göster/Gizle">
+                  <svg id="passEyeIcon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <button type="button" class="btn-login-submit" onclick="submitLogin()">
+              Giriş Yap →
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ARKA PLAN AĞAÇ -->
+    <svg class="tree-background" viewBox="0 0 500 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M320 800V420L295 450L275 410L250 450L220 395L190 440L150 380L110 450L70 370L20 480V800H320Z" fill="#7fa98c"/>
+      <path d="M420 800V310L395 345L375 305L350 345L325 290L295 335L260 270L220 340L180 260L130 360L80 430V800H420Z" fill="#699677"/>
+      <path d="M480 800V240L455 275L435 235L410 275L385 220L355 265L320 200L280 270L240 190L190 290L140 370L100 450L70 520V800H480Z" fill="#588566"/>
+      <path d="M500 800V150L465 200L435 145L400 195L365 130L325 185L285 110L235 190L185 100L130 210L80 310L40 400L20 500V800H500Z" fill="#477355"/>
+    </svg>
+
+  </div>
+</div>
+
+<script>
+  var currentTarget = '/dashboard';
+
+  function showLoginForm(rolAdi, iconPath, hedef) {
+    currentTarget = hedef;
+
+    // Başlık güncelle
+    document.getElementById('loginRoleTitle').textContent = rolAdi + ' Girişi';
+    document.getElementById('loginRoleIcon').querySelector('path').setAttribute('d', iconPath);
+    document.getElementById('loginTarget').value = hedef;
+
+    // Kartları ve Kayıt Ol butonunu gizle
+    var cards = document.getElementById('cardsSection');
+    var regRow = document.getElementById('registerRow');
+    cards.style.opacity = '0';
+    cards.style.transform = 'translateY(-10px)';
+    setTimeout(function() {
+      cards.style.display = 'none';
+      regRow.style.display = 'none';
+      var form = document.getElementById('loginFormSection');
+      form.style.display = 'block';
+    }, 280);
+
+    // Banner güncelle
+    document.getElementById('bannerTitle').textContent = rolAdi + ' Girişi';
+    document.getElementById('bannerDesc').textContent = 'E-posta adresiniz ve şifrenizle giriş yapın';
+  }
+
+  function showCards() {
+    // Formu gizle
+    document.getElementById('loginFormSection').style.display = 'none';
+
+    // Kartları geri göster
+    var cards = document.getElementById('cardsSection');
+    var regRow = document.getElementById('registerRow');
+    cards.style.display = 'flex';
+    cards.style.opacity = '0';
+    cards.style.transform = 'translateY(-10px)';
+    regRow.style.display = 'flex';
+    setTimeout(function() {
+      cards.style.opacity = '1';
+      cards.style.transform = 'translateY(0)';
+      cards.style.transition = 'opacity 0.3s, transform 0.3s';
+    }, 30);
+
+    // Banner resetle
+    document.getElementById('bannerTitle').textContent = 'Giriş Türünü Seçiniz';
+    document.getElementById('bannerDesc').textContent = 'Rezervasyon oluşturmak için giriş türünüzü seçiniz';
+
+    // Input temizle
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+  }
+
+  function submitLogin() {
+    // Tasarım aşaması — doğrudan yönlendir
+    window.location.href = currentTarget;
+  }
+
+  function togglePass() {
+    var input = document.getElementById('loginPassword');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+</script>
+
+</body>
+</html>

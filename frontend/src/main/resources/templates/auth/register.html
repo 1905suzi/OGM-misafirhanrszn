@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:replace="~{fragments/header :: head('Üye Ol | Kayıt')}"></th:block>
+  <style>
+    /* Kayıt sayfası özel stilleri */
+    .register-wrap {
+      min-height: calc(100vh - var(--auth-navbar-h));
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 2.5rem 1rem 3rem;
+    }
+
+    .register-card {
+      background: var(--white); border-radius: var(--r-xl);
+      box-shadow: var(--shadow-xl); border: 1px solid var(--gray-200);
+      width: 100%; max-width: 680px; overflow: hidden;
+    }
+
+    /* Başlık bandı */
+    .register-card-header {
+      background: var(--ogm-900); padding: 1.75rem 2.25rem;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .header-icon-wrap {
+      width: 48px; height: 48px; flex-shrink: 0;
+      background: rgba(255,255,255,0.12); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .header-icon-wrap svg { width: 24px; height: 24px; fill: white; }
+    .register-card-header .hdr-sub  { font-size:.7rem; font-weight:600; letter-spacing:.07em; color:rgba(255,255,255,.4); text-transform:uppercase; }
+    .register-card-header .hdr-title{ font-size:1.2rem; font-weight:700; color:#fff; margin:3px 0; }
+    .register-card-header .hdr-desc { font-size:.75rem; color:rgba(255,255,255,.45); }
+
+    /* Form gövdesi */
+    .register-card-body { padding: 2rem 2.25rem 2.25rem; }
+
+    /* Bölüm başlığı */
+    .section-label {
+      font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      color: var(--ogm-600); border-bottom:2px solid var(--ogm-100);
+      padding-bottom:.4rem; margin-bottom:1.1rem; margin-top:1.5rem;
+    }
+    .section-label:first-of-type { margin-top: 0; }
+
+    /* İkili grid */
+    .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem 1.5rem; }
+    .span-2 { grid-column: span 2; }
+
+    /* Form alanları */
+    .ogm-field { display:flex; flex-direction:column; }
+    .ogm-field label {
+      font-size:.82rem; font-weight:600; color:var(--gray-700); margin-bottom:6px;
+    }
+    .ogm-field label .req { color:#e53e3e; margin-right:2px; }
+    .ogm-input {
+      padding:.72rem 1rem; border:1.5px solid var(--gray-200); border-radius:var(--r-sm);
+      font-size:.9rem; color:var(--gray-800); background:var(--gray-50);
+      outline:none; transition:border-color .2s, box-shadow .2s;
+    }
+    .ogm-input:focus {
+      border-color:var(--ogm-600); background:var(--white);
+      box-shadow:0 0 0 3px rgba(45,97,53,.11);
+    }
+
+    /* Şifre toggle */
+    .pass-wrap { position:relative; }
+    .pass-wrap .ogm-input { padding-right:2.8rem; }
+    .toggle-pwd {
+      position:absolute; right:.75rem; top:50%; transform:translateY(-50%);
+      background:none; border:none; cursor:pointer; color:var(--gray-400); font-size:.95rem;
+      transition:color .2s;
+    }
+    .toggle-pwd:hover { color:var(--ogm-600); }
+
+    /* KVKK */
+    .kvkk-row {
+      display:flex; align-items:flex-start; gap:10px; margin-top:1.4rem;
+    }
+    .kvkk-row input[type=checkbox] { width:16px; height:16px; margin-top:2px; accent-color:var(--ogm-700); flex-shrink:0; }
+    .kvkk-row span { font-size:.8rem; color:var(--gray-600); line-height:1.55; }
+    .kvkk-row span strong { color:var(--ogm-700); }
+
+    /* Aksiyon satırı */
+    .form-actions {
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:.75rem; margin-top:1.75rem;
+    }
+    .link-back { font-size:.83rem; color:var(--ogm-600); font-weight:600; text-decoration:none; }
+    .link-back:hover { text-decoration:underline; }
+
+    /* Kayıt butonu */
+    .btn-register-submit {
+      display:inline-flex; align-items:center; gap:8px;
+      background:var(--ogm-900); color:white; border:none;
+      padding:.72rem 2rem; border-radius:50px;
+      font-size:.92rem; font-weight:600; cursor:pointer;
+      transition:background .25s, transform .15s, box-shadow .25s;
+      letter-spacing:.3px;
+    }
+    .btn-register-submit:hover {
+      background:var(--ogm-800);
+      transform:translateY(-1px);
+      box-shadow:0 6px 20px rgba(26,56,32,.25);
+    }
+    .btn-register-submit i { font-size:.95rem; }
+  </style>
+</head>
+
+<body class="auth-body">
+
+  <!-- Üst Navigasyon -->
+  <div th:replace="~{fragments/header :: auth-navbar}"></div>
+
+  <div class="register-wrap">
+    <div class="register-card">
+
+      <!-- Başlık -->
+      <div class="register-card-header">
+        <div class="header-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </div>
+        <div>
+          <div class="hdr-sub">Orman Genel Müdürlüğü</div>
+          <div class="hdr-title">Personel Kaydı</div>
+          <div class="hdr-desc">OGM personeline özel üyelik kaydı</div>
+        </div>
+      </div>
+
+      <!-- Form Gövdesi -->
+      <div class="register-card-body">
+        <form id="registerForm" action="/giris" method="get" novalidate autocomplete="off">
+
+          <!-- KİŞİSEL BİLGİLER -->
+          <div class="section-label">Kişisel Bilgiler</div>
+          <div class="form-grid-2">
+
+            <div class="ogm-field">
+              <label for="regAd"><span class="req">*</span>Ad</label>
+              <input id="regAd" type="text" class="ogm-input" placeholder="Adınız"/>
+            </div>
+
+            <div class="ogm-field">
+              <label for="regSoyad"><span class="req">*</span>Soyad</label>
+              <input id="regSoyad" type="text" class="ogm-input" placeholder="Soyadınız"/>
+            </div>
+
+            <div class="ogm-field">
+              <label for="regTc"><span class="req">*</span>T.C. Kimlik No</label>
+              <input id="regTc" type="text" class="ogm-input" placeholder="11 haneli TC kimlik no" maxlength="11"/>
+            </div>
+
+            <div class="ogm-field">
+              <label for="regSicil"><span class="req">*</span>Sicil Numarası</label>
+              <input id="regSicil" type="text" class="ogm-input" placeholder="OGM sicil numaranız"/>
+            </div>
+
+          </div>
+
+          <!-- İLETİŞİM BİLGİLERİ -->
+          <div class="section-label">İletişim Bilgileri</div>
+          <div class="form-grid-2">
+
+            <div class="ogm-field">
+              <label for="regEposta"><span class="req">*</span>E-posta</label>
+              <input id="regEposta" type="email" class="ogm-input" placeholder="ornek@ogm.gov.tr" autocomplete="email"/>
+            </div>
+
+            <div class="ogm-field">
+              <label for="regTelefon"><span class="req">*</span>Telefon</label>
+              <input id="regTelefon" type="tel" class="ogm-input" placeholder="05XX XXX XX XX"/>
+            </div>
+
+          </div>
+
+          <!-- GÜVENLİK -->
+          <div class="section-label">Güvenlik</div>
+          <div class="form-grid-2">
+
+            <div class="ogm-field">
+              <label for="regSifre"><span class="req">*</span>Şifre</label>
+              <div class="pass-wrap">
+                <input id="regSifre" type="password" class="ogm-input" placeholder="Şifrenizi belirleyin" autocomplete="new-password"/>
+                <button type="button" class="toggle-pwd" onclick="togglePassword('regSifre', this)" aria-label="Şifreyi göster/gizle">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="ogm-field">
+              <label for="regSifreTekrar"><span class="req">*</span>Şifre Tekrar</label>
+              <div class="pass-wrap">
+                <input id="regSifreTekrar" type="password" class="ogm-input" placeholder="Şifreyi tekrar girin" autocomplete="new-password"/>
+                <button type="button" class="toggle-pwd" onclick="togglePassword('regSifreTekrar', this)" aria-label="Şifreyi göster/gizle">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- KVKK -->
+          <div class="kvkk-row">
+            <input type="checkbox" id="kvkk"/>
+            <span>
+              <strong>Kişisel Verilerin Korunması Aydınlatma Metni</strong>'ni okudum, anladım ve kabul ediyorum.
+            </span>
+          </div>
+
+          <!-- AKSIYON -->
+          <div class="form-actions">
+            <a href="/giris" class="link-back">← Giriş sayfasına dön</a>
+            <button type="submit" class="btn-register-submit">
+              <i class="bi bi-person-plus-fill"></i>
+              Kayıt Oluştur
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Alt Bilgi -->
+  <div th:replace="~{fragments/footer :: auth-footer}"></div>
+
+  <!-- JS -->
+  <th:block th:replace="~{fragments/header :: scripts}"></th:block>
+  <script th:src="@{/js/auth.js}"></script>
+
+</body>
+</html>

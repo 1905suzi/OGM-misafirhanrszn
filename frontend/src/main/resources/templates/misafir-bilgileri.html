@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Misafir Bilgileri - OGM Misafirhane</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa;">
+
+<div style="display: flex; min-height: 100vh; width: 100%;">
+
+    <!-- Sol Menü (Sidebar) Fragment -->
+    <div th:replace="~{fragments/sidebar :: sidebar('rezervasyon')}"></div>
+
+    <!-- Sağ Taraf Ana İçerik Alanı (margin-left: 260px eklendi) -->
+    <div style="flex: 1; display: flex; flex-direction: column; min-width: 0; margin-left: 260px;">
+
+        <!-- Üst Bar (Topbar) Fragment -->
+        <div th:replace="~{fragments/header :: panel-topbar('OGM Misafirhane Rezervasyon Portalı', 'Aylin Melike')}"></div>
+
+        <!-- Sayfa İçeriği -->
+        <main style="padding: 2.5rem; flex: 1; box-sizing: border-box;">
+
+            <!-- Sayfa Başlığı -->
+            <div style="margin-bottom: 2rem;">
+                <h1 style="font-size: 1.5rem; font-weight: 700; color: #111; margin: 0 0 4px 0;">Yeni Rezervasyon Oluştur</h1>
+                <p style="color: #666; font-size: 0.9rem; margin: 0;">Bilgilerinizi adım adım doldurunuz</p>
+            </div>
+
+            <!-- Form Kutusu ve Adım Göstergesi -->
+            <div style="background: white; border-radius: 12px; padding: 2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); width: 100%; max-width: 1000px; box-sizing: border-box; margin-bottom: 3rem;">
+
+                <!-- Adım Çubuğu (Stepped Progress) -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee; font-size: 0.85rem;">
+                    <div style="display: flex; align-items: center; gap: 8px; color: #245332; font-weight: 600;">
+                        <i class="bi bi-person-lines-fill" style="font-size: 1.2rem;"></i> Misafir Bilgileri
+                    </div>
+                    <div style="height: 2px; flex: 1; background: #ddd; margin: 0 15px;"></div>
+                    <div style="display: flex; align-items: center; gap: 8px; color: #999;">
+                        <i class="bi bi-calendar-check" style="font-size: 1.2rem;"></i> Konaklama
+                    </div>
+                    <div style="height: 2px; flex: 1; background: #ddd; margin: 0 15px;"></div>
+                    <div style="display: flex; align-items: center; gap: 8px; color: #999;">
+                        <i class="bi bi-house" style="font-size: 1.2rem;"></i> Oda Seçimi
+                    </div>
+                    <div style="height: 2px; flex: 1; background: #ddd; margin: 0 15px;"></div>
+                    <div style="display: flex; align-items: center; gap: 8px; color: #999;">
+                        <i class="bi bi-eye" style="font-size: 1.2rem;"></i> Ön İzleme
+                    </div>
+                    <div style="height: 2px; flex: 1; background: #ddd; margin: 0 15px;"></div>
+                    <div style="display: flex; align-items: center; gap: 8px; color: #999;">
+                        <i class="bi bi-credit-card" style="font-size: 1.2rem;"></i> Ödeme
+                    </div>
+                </div>
+
+                <!-- Bölüm Başlığı -->
+                <div style="margin-bottom: 1.5rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 600; color: #222; margin: 0 0 4px 0;">Misafir Bilgileri</h2>
+                    <p style="color: #666; font-size: 0.85rem; margin: 0;">Konaklayacak kişinin kimlik ve iletişim bilgilerini eksiksiz giriniz.</p>
+                </div>
+
+                <!-- Misafir Formu Alanı -->
+                <form action="/konaklama" method="get">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+
+                        <!-- T.C. / Sicil No -->
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px;">
+                                <span style="color: #d32f2f;">*</span> T.C. / Sicil No
+                            </label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <i class="bi bi-card-text" style="position: absolute; left: 14px; color: #a3c1ad; font-size: 1rem;"></i>
+                                <input type="text" placeholder="TC Kimlik veya Sicil No" style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.5rem; background: #1c4227; color: white; border: none; border-radius: 8px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
+                            </div>
+                        </div>
+
+                        <!-- Misafir Tipi -->
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px;">
+                                <span style="color: #d32f2f;">*</span> Misafir Tipi
+                            </label>
+                            <select style="width: 100%; padding: 0.75rem; background: #1c4227; color: white; border: none; border-radius: 8px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
+                                <option>OGM Personeli</option>
+                                <option>Kamu Personeli</option>
+                                <option>Misafir</option>
+                            </select>
+                        </div>
+
+                        <!-- Ad -->
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px;">
+                                <span style="color: #d32f2f;">*</span> Ad
+                            </label>
+                            <input type="text" placeholder="Adı" style="width: 100%; padding: 0.75rem; background: #1c4227; color: white; border: none; border-radius: 8px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
+                        </div>
+
+                        <!-- Soyad -->
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px;">
+                                <span style="color: #d32f2f;">*</span> Soyad
+                            </label>
+                            <input type="text" placeholder="Soyadı" style="width: 100%; padding: 0.75rem; background: #1c4227; color: white; border: none; border-radius: 8px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
+                        </div>
+
+                        <!-- Doğum Tarihi -->
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px;">
+                                <span style="color: #d32f2f;">*</span> Doğum Tarihi
+                            </label>
+                            <input type="date"
+                                   style="width: 100%; background: #1c4227; color: white; border: none; padding: 0.9rem 1rem; border-radius: 8px; font-size: 0.95rem; outline: none; box-sizing: border-box; cursor: pointer;">
+                        </div>
+
+                        <!-- Telefon -->
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px;">
+                                <span style="color: #d32f2f;">*</span> Telefon
+                            </label>
+                            <input type="text" placeholder="05XX XXX XX XX" style="width: 100%; padding: 0.75rem; background: #1c4227; color: white; border: none; border-radius: 8px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
+                        </div>
+
+                    </div>
+
+                    <!-- E-posta -->
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px;">E-posta</label>
+                        <input type="email" placeholder="ornek@mail.com" style="width: 100%; max-width: calc(50% - 0.75rem); padding: 0.75rem; background: #1c4227; color: white; border: none; border-radius: 8px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
+                    </div>
+
+                    <!-- Alt Butonlar -->
+                    <div style="display: flex; justify-content: flex-end; border-top: 1px solid #eee; padding-top: 1.5rem;">
+                        <button type="submit" style="background: #1c4227; color: white; border: none; padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                            İleri →
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </main>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+CREATE TABLE rooms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    room_number INTEGER NOT NULL UNIQUE CHECK (room_number BETWEEN 1 AND 100),
+    floor VARCHAR(16) NOT NULL,
+    room_type VARCHAR(50) NOT NULL,
+    capacity INTEGER NOT NULL CHECK (capacity > 0),
+    automatic_status VARCHAR(16) NOT NULL DEFAULT 'BOS',
+    manual_status VARCHAR(16)
+);

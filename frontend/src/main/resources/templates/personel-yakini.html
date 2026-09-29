@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OGM Misafirhane - Personel Yakını Doğrulama</title>
+    <style>
+        /* Genel Ayarlar */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f6f8f7; overflow: hidden; }
+
+        /* SOL SIDEBAR */
+        .sidebar { width: 260px; background-color: #163a22; display: flex; flex-direction: column; color: white; z-index: 20; }
+        .sidebar-top { padding-top: 2rem; }
+        .logo-area { text-align: center; margin-bottom: 2rem; }
+        .logo-area img { width: 85px; height: 85px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .logo-area h2 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
+        .logo-area p { font-size: 0.8rem; color: #8bb197; margin-top: 2px; }
+        .menu { display: flex; flex-direction: column; gap: 5px; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: #a8c1b1; text-decoration: none; font-size: 0.95rem; transition: all 0.2s; }
+        .menu-item svg { width: 18px; height: 18px; fill: currentColor; }
+        .menu-item.active { background-color: #21472e; color: white; border-left: 4px solid #8fbc9f; }
+        .menu-item:hover:not(.active) { color: white; background-color: rgba(255,255,255,0.05); }
+        .sidebar-bottom { margin-top: auto; padding: 20px 20px 30px; }
+        .logout-btn { display: flex; align-items: center; gap: 10px; color: #d1dcd5; text-decoration: none; font-size: 0.95rem; }
+
+        /* ANA İÇERİK ALANI */
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; }
+
+        /* ÜST BAŞLIK */
+        .top-header { height: 70px; background: white; display: flex; justify-content: flex-end; align-items: center; padding: 0 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); z-index: 20; }
+        .user-profile { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; color: #333; }
+        .user-avatar { width: 32px; height: 32px; background-color: #163a22; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        /* ORTA İÇERİK (Form Alanı) */
+        .content-body { flex: 1; padding: 3rem; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; overflow-y: auto;}
+
+        /* FORM KARTI */
+        .form-card { background: white; width: 100%; max-width: 800px; border-radius: 12px; padding: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.04); position: relative; z-index: 10; }
+
+        /* FORM ÜST BİLGİ ALANI */
+        .form-header-box { background-color: #1a3b25; border-radius: 8px; padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 15px; margin-bottom: 2rem; color: white; }
+        .form-header-icon { width: 40px; height: 40px; background: transparent; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .form-header-icon svg { width: 20px; height: 20px; fill: white; }
+        .form-header-text h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 4px; }
+        .form-header-text p { font-size: 0.85rem; color: #a8c1b1; }
+
+        /* FORM IZGARASI VE ELEMANLARI */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; margin-bottom: 1.5rem; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 600; color: #333; margin-bottom: 8px; }
+        .form-label .required { color: #d9534f; margin-right: 4px; }
+        .input-wrapper { position: relative; }
+        .input-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; fill: white; pointer-events: none; }
+        .form-input { width: 100%; background-color: #2b5b3b; color: white; border: none; border-radius: 6px; padding: 12px 15px 12px 42px; font-size: 0.95rem; outline: none; transition: box-shadow 0.2s; }
+        .form-input::placeholder { color: #a3c1ad; opacity: 1; }
+        .form-input:focus { box-shadow: 0 0 0 2px #4caf50; }
+
+        /* YENİ: DIŞARIDAKİ ANA KOD GÖNDER BUTONU */
+        .btn-send-main { background: #1a3b25; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; margin-bottom: 1.5rem; }
+        .btn-send-main:hover { background: #122a1a; }
+
+        /* DOĞRULAMA KUTUSU (AÇIK YEŞİL) */
+        .verification-box { background-color: #eaf5ed; border: 1px solid #a8c1b1; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .veri-left .veri-title { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #1a3b25; margin-bottom: 10px; }
+        .veri-left .veri-title svg { width: 18px; height: 18px; fill: #1a3b25; }
+        .otp-inputs { display: flex; gap: 10px; }
+        .otp-inputs input { width: 45px; height: 55px; font-size: 1.5rem; text-align: center; border: 2px solid #2b5b3b; border-radius: 6px; color: #1a3b25; font-weight: bold; background: white; }
+        .otp-subtext { font-size: 0.75rem; color: #555; margin-top: 8px; }
+
+        .veri-right { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .btn-send-code { background: transparent; border: 1px solid #1a3b25; color: #1a3b25; padding: 8px 25px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-send-code:hover { background: #1a3b25; color: white; }
+
+        /* ROBOT DOĞRULAMASI */
+        .robot-box { display: inline-flex; align-items: center; gap: 10px; border: 1px solid #ddd; padding: 10px 15px; border-radius: 4px; background: #fafafa; margin-bottom: 2rem; color: #333; font-weight: 500; font-size: 0.9rem; }
+        .robot-box svg { width: 20px; height: 20px; fill: #4caf50; }
+
+        /* BUTONLAR VE AKSİYONLAR */
+        .form-actions { display: flex; justify-content: space-between; align-items: center; position: relative;}
+        .btn-back, .btn-help { background: white; border: 1px solid #ccc; color: #333; padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .btn-back:hover, .btn-help:hover { background: #f0f0f0; }
+        .btn-next { background: #1a3b25; border: none; color: white; padding: 0.7rem 2rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .btn-next:hover { background: #122a1a; }
+
+        /* YEŞİL ŞEFFAF ONAY MESAJI (TOAST) */
+        .success-toast {
+            position: fixed; right: 30px;
+            background-color: rgba(209, 231, 221, 0.95); border: 1px solid #a3cfbb;
+            color: #0f5132; padding: 15px 20px; border-radius: 8px;
+            display: none; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .success-toast svg { width: 24px; height: 24px; fill: #0f5132; }
+
+        /* AĞAÇ ARKA PLANI */
+        .tree-background { position: absolute; bottom: -20px; right: -20px; width: 550px; height: 800px; z-index: 0; pointer-events: none; overflow: hidden; filter: blur(10px) opacity(0.25); mix-blend-mode: multiply; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-top">
+        <div class="logo-area">
+            <!-- Sabitlenen Logo URL'si -->
+            <img th:src="@{/images/ogm-logo.png}" alt="OGM Logo">
+            <h2>OGM MİSAFİRHANE</h2>
+            <p>Rezervasyon Portalı</p>
+        </div>
+        <div class="menu">
+            <a href="/giris" class="menu-item active">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Ana Sayfa
+            </a>
+            <a href="/iletisim" class="menu-item">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> İletişim
+            </a>
+        </div>
+    </div>
+    <div class="sidebar-bottom">
+        <a href="/cikis" class="logout-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg> Çıkış Yap
+        </a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="top-header">
+        <div style="flex:1; font-weight:600; color:#1a3b25; font-size:1.1rem;">OGM Misafirhane Rezervasyon Portalı</div>
+        <div class="user-profile">
+            <div class="user-avatar">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-3 2c-2.67 0-8 1.34-8 4v2h16v-2c0-.42.09-.81.25-1.18-.75-.4-1.7-.68-2.85-.82H9zm11 0c-1.85 0-3.15 1.5-3.15 2.5 0 2 3.15 4.5 3.15 4.5s3.15-2.5 3.15-4.5c0-1-1.3-2.5-3.15-2.5z"/></svg>
+            </div>
+            <span>Personel Yakını ˅</span>
+        </div>
+    </div>
+
+    <div class="content-body">
+
+        <div class="form-card">
+
+            <div class="form-header-box">
+                <div class="form-header-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                </div>
+                <div class="form-header-text">
+                    <h2>Personel Yakını Doğrulama</h2>
+                    <p>Lütfen kimlik bilgilerinizi girerek doğrulama yapınız</p>
+                </div>
+            </div>
+
+            <form id="dogrulamaFormu">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label"><span class="required">*</span> Kullanıcı Adı (Yakın ID)</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            <input type="text" id="kullaniciAdi" class="form-input" placeholder="Personel Kullanıcı Adı" required>
+                        </div>
+                        <div id="err-kullanici" style="color: #d9534f; font-size: 0.85rem; margin-top: 6px; display: none; font-weight: 500;">Lütfen Kullanıcı Adı giriniz.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><span class="required">*</span> E-mail Adresi</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                            <input type="email" id="emailAdresi" class="form-input" placeholder="Personel E-mail Adresi" required>
+                        </div>
+                        <div id="err-email" style="color: #d9534f; font-size: 0.85rem; margin-top: 6px; display: none; font-weight: 500;">Lütfen E-mail Adresi giriniz.</div>
+                    </div>
+                </div>
+
+                <!-- YENİ: PANEL DIŞINDAKİ ANA KOD GÖNDER BUTONU -->
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="button" class="btn-send-main" onclick="kodGonder()">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        Kodu Gönder
+                    </button>
+                </div>
+
+                <div class="verification-box">
+                    <div class="veri-left">
+                        <div class="veri-title">
+                            <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                            Doğrulama Kodu
+                        </div>
+
+                        <div class="otp-inputs">
+                            <input type="text" id="otp1" maxlength="1" onkeyup="sonrakiKutu(this, 'otp2')">
+                            <input type="text" maxlength="1" id="otp2" onkeyup="sonrakiKutu(this, 'otp3')">
+                            <input type="text" maxlength="1" id="otp3" onkeyup="sonrakiKutu(this, 'otp4')">
+                            <input type="text" maxlength="1" id="otp4">
+                        </div>
+
+                        <div class="otp-subtext">SMS/e-posta ile gönderilen 4 haneli kodu giriniz</div>
+                        <div id="err-otp" style="color: #d9534f; font-size: 0.85rem; margin-top: 6px; display: none; font-weight: 500;">Lütfen 4 haneli doğrulama kodunu eksiksiz giriniz.</div>
+                    </div>
+
+                    <div class="veri-right">
+                        <!-- BURASI ARTIK SADECE TEKRAR GÖNDERME İŞLEVİ GÖRÜYOR -->
+                        <button type="button" class="btn-send-code" onclick="kodGonder()">Tekrar Gönder</button>
+                        <div class="otp-subtext">60 saniye sonra tekrar gönderilebilir</div>
+                    </div>
+                </div>
+
+                <div class="robot-box">
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    Ben robot değilim
+                </div>
+
+                <div class="form-actions">
+                    <a th:href="@{/giris}" class="btn-back">← Geri Dön</a>
+                    <!-- YENİ: YARDIM BUTONU İLETİŞİM SAYFASINA YÖNLENDİRİLDİ -->
+                    <a th:href="@{/iletisim}" class="btn-help">❔ Yardım</a>
+                    <button type="button" class="btn-next" onclick="dogrulamaIslemi(event)">Doğrula →</button>
+                </div>
+
+                <!-- YENİ: KOD GÖNDERİLDİ TOAST MESAJI -->
+                <div id="codeSentToast" class="success-toast" style="bottom: 100px;">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    <span>Kod gönderildi! Lütfen e-postanızı kontrol edin.</span>
+                </div>
+
+                <div id="successToast" class="success-toast" style="bottom: 30px;">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <span>Kod Onaylandı! Rezervasyon ekranına yönlendiriliyorsunuz...</span>
+                </div>
+
+            </form>
+
+        </div>
+
+        <svg class="tree-background" viewBox="0 0 500 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M320 800V420L295 450L275 410L250 450L220 395L190 440L150 380L110 450L70 370L20 480V800H320Z" fill="#7fa98c"/>
+            <path d="M420 800V310L395 345L375 305L350 345L325 290L295 335L260 270L220 340L180 260L130 360L80 430V800H420Z" fill="#699677"/>
+            <path d="M480 800V240L455 275L435 235L410 275L385 220L355 265L320 200L280 270L240 190L190 290L140 370L100 450L70 520V800H480Z" fill="#588566"/>
+            <path d="M500 800V150L465 200L435 145L400 195L365 130L325 185L285 110L235 190L185 100L130 210L80 310L40 400L20 500V800H500Z" fill="#477355"/>
+        </svg>
+    </div>
+</div>
+
+<script>
+    function sonrakiKutu(mevcut, sonrakiId) {
+        if (mevcut.value.length >= 1) {
+            document.getElementById(sonrakiId).focus();
+        }
+    }
+
+    // YENİ EKLENEN: KOD GÖNDERME BİLDİRİMİ FONKSİYONU
+    function kodGonder() {
+        const toast = document.getElementById('codeSentToast');
+        toast.style.display = 'flex';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }
+
+    function dogrulamaIslemi(event) {
+        event.preventDefault();
+
+        const toast = document.getElementById('successToast');
+        toast.style.display = 'flex';
+
+        setTimeout(() => {
+            window.location.href = '/konaklama';
+        }, 1500);
+    }
+</script>
+</body>
+</html>

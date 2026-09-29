@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- FRAGMENT: auth-footer — Auth sayfası altbilgisi -->
+<footer th:fragment="auth-footer" class="auth-footer" role="contentinfo">
+  <span>
+    © 2025
+    <a href="https://www.ogm.gov.tr" target="_blank" rel="noopener">
+      Orman Genel Müdürlüğü
+    </a>
+    — Misafirhane Rezervasyon Sistemi
+  </span>
+</footer>
+
+<!-- FRAGMENT: panel-footer — Dashboard / Admin alt çubuğu -->
+<footer th:fragment="panel-footer"
+        style="background:var(--white);border-top:1px solid var(--gray-200);
+               padding:.65rem 1.75rem;font-size:.75rem;color:var(--gray-400);
+               text-align:center;"
+        role="contentinfo">
+  © 2025
+  <a href="https://www.ogm.gov.tr" target="_blank" rel="noopener"
+     style="color:var(--ogm-600);">Orman Genel Müdürlüğü</a>
+  — Misafirhane Rezervasyon Sistemi · Tüm Hakları Saklıdır.
+</footer>
+
+</html>

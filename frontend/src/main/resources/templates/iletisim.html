@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OGM Misafirhane - İletişim & Canlı Asistan</title>
+    <style>
+        /* Genel Ayarlar ve Mevcut Düzen */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f6f8f7; overflow: hidden; }
+        .sidebar { width: 260px; background-color: #163a22; display: flex; flex-direction: column; color: white; z-index: 20; }
+        .sidebar-top { padding-top: 2rem; }
+        .logo-area { text-align: center; margin-bottom: 2rem; }
+        .logo-area img { width: 85px; height: 85px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .logo-area h2 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
+        .logo-area p { font-size: 0.8rem; color: #8bb197; margin-top: 2px; }
+        .menu { display: flex; flex-direction: column; gap: 5px; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: #a8c1b1; text-decoration: none; font-size: 0.95rem; transition: all 0.2s; }
+        .menu-item svg { width: 18px; height: 18px; fill: currentColor; }
+        .menu-item.active { background-color: #21472e; color: white; border-left: 4px solid #8fbc9f; }
+        .menu-item:hover:not(.active) { color: white; background-color: rgba(255,255,255,0.05); }
+        .sidebar-bottom { margin-top: auto; padding: 20px 20px 30px; }
+        .logout-btn { display: flex; align-items: center; gap: 10px; color: #d1dcd5; text-decoration: none; font-size: 0.95rem; }
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; }
+        .top-header { height: 70px; background: white; display: flex; justify-content: flex-end; align-items: center; padding: 0 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); z-index: 20; }
+        .user-profile { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; color: #333; }
+        .user-avatar { width: 32px; height: 32px; background-color: #163a22; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .content-body { flex: 1; padding: 3rem; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; }
+        .info-banner { background: white; width: 100%; max-width: 900px; padding: 1.5rem 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); margin-bottom: 2.5rem; position: relative; z-index: 10; }
+        .info-banner h1 { font-size: 1.4rem; color: #111; margin-bottom: 6px; }
+        .info-banner p { font-size: 0.9rem; color: #555; }
+        .cards-container { display: flex; gap: 20px; width: 100%; max-width: 900px; justify-content: center; position: relative; z-index: 10; }
+        .selection-card { background: white; width: 350px; border-radius: 8px; padding: 2.5rem 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-left: 5px solid #2b5e39; border-top: 1px solid #eaeaea; border-right: 1px solid #eaeaea; border-bottom: 1px solid #eaeaea; display: flex; flex-direction: column; align-items: center; transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .selection-card:hover { transform: translateY(-12px) scale(1.02); box-shadow: 0 20px 30px rgba(0,0,0,0.08); border-left: 5px solid #1a4225; }
+        .selection-card.highlight { border: 2px solid #bce3cc; border-left: 5px solid #2b5e39; box-shadow: 0 6px 20px rgba(22, 58, 34, 0.08); background-color: #fcfffd; }
+        .selection-card.highlight:hover { box-shadow: 0 20px 35px rgba(22, 58, 34, 0.15); }
+        .card-icon svg { width: 65px; height: 65px; fill: #437652; margin-bottom: 1.2rem; transition: transform 0.3s ease; }
+        .selection-card:hover .card-icon svg { transform: scale(1.1); }
+        .selection-card h3 { font-size: 1.15rem; color: #222; margin-bottom: 12px; font-weight: 600; }
+        .selection-card p { font-size: 0.9rem; color: #555; line-height: 1.6; margin-bottom: 1rem; }
+        .contact-details { text-align: left; width: 100%; background: #f4f6f5; padding: 15px; border-radius: 6px; border: 1px solid #eaeaea; }
+        .contact-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.9rem; color: #333; }
+        .contact-row:last-child { margin-bottom: 0; }
+        .contact-row svg { width: 18px; height: 18px; fill: #2b5e39; }
+        .select-btn { background-color: #3b6b4a; color: white; border: none; padding: 0.6rem 1.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 0.3s; margin-top: auto;}
+        .select-btn:hover { background-color: #2b5e39; }
+        .tree-background { position: absolute; bottom: -20px; right: -20px; width: 550px; height: 800px; z-index: 0; pointer-events: none; overflow: hidden; filter: blur(10px) opacity(0.25); mix-blend-mode: multiply; }
+
+        /* CANLI ASİSTAN SOHBET PENCERESİ CSS'İ */
+        .chat-widget {
+            position: fixed; bottom: 30px; right: 30px; width: 350px; height: 500px;
+            background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: none; flex-direction: column; overflow: hidden; z-index: 1000;
+            border: 1px solid #eaeaea;
+        }
+        .chat-header {
+            background: #163a22; color: white; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-header-info { display: flex; align-items: center; gap: 10px; }
+        .chat-header-info svg { width: 24px; height: 24px; fill: white; }
+        .chat-header-info div { display: flex; flex-direction: column; }
+        .chat-header-info h4 { font-size: 1rem; font-weight: 600; margin: 0; }
+        .chat-header-info span { font-size: 0.75rem; color: #a8c1b1; }
+        .close-chat { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; line-height: 1; }
+
+        .chat-messages {
+            flex: 1; padding: 20px; overflow-y: auto; background: #fcfdfc;
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .message { max-width: 85%; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; line-height: 1.4; }
+        .msg-bot { background: #eaf5ed; color: #1a3b25; align-self: flex-start; border-bottom-left-radius: 0; border: 1px solid #bce3cc; }
+        .msg-user { background: #163a22; color: white; align-self: flex-end; border-bottom-right-radius: 0; }
+
+        .chat-input-area {
+            padding: 15px; background: white; border-top: 1px solid #eaeaea;
+            display: flex; gap: 10px;
+        }
+        .chat-input-area input {
+            flex: 1; padding: 10px 15px; border: 1px solid #ccc; border-radius: 20px;
+            outline: none; font-size: 0.9rem;
+        }
+        .chat-input-area input:focus { border-color: #163a22; }
+        .chat-send-btn {
+            background: #163a22; border: none; border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
+        }
+        .chat-send-btn:hover { background: #21472e; }
+        .chat-send-btn svg { width: 18px; height: 18px; fill: white; margin-left: 2px; }
+
+        .chat-quick-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .qr-btn { background: white; border: 1px solid #163a22; color: #163a22; padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
+        .qr-btn:hover { background: #163a22; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-top">
+        <div class="logo-area">
+            <img th:src="@{/images/ogm-logo.png}" alt="OGM Logo">
+            <h2>OGM MİSAFİRHANE</h2>
+            <p>Rezervasyon Portalı</p>
+        </div>
+        <div class="menu">
+            <!-- GÜNCELLENDİ: Giriş yapıldıysa Dashboard'a, yapılmadıysa Giriş ekranına yönlendirilir -->
+            <a th:href="@{${session.aktifKullanici != null ? '/dashboard' : '/giris'}}" class="menu-item">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Ana Sayfa
+            </a>
+
+            <!-- GÜNCELLENDİ: Sadece oturum varsa (giriş yapıldıysa) gösterilir -->
+            <a th:if="${session.aktifKullanici != null}" href="/rezervasyon-olustur" class="menu-item">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V9H8v3H6v2h2v3h2v-3h2v-2z"/></svg> Rezervasyon Oluştur
+            </a>
+
+            <!-- GÜNCELLENDİ: Sadece oturum varsa (giriş yapıldıysa) gösterilir -->
+            <a th:if="${session.aktifKullanici != null}" href="/rezervasyonlarim" class="menu-item">
+                <svg viewBox="0 0 24 24"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z"/></svg> Rezervasyonlarım
+            </a>
+
+            <a href="/iletisim" class="menu-item active">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> İletişim
+            </a>
+        </div>
+    </div>
+
+    <!-- GÜNCELLENDİ: Çıkış butonu da sadece oturum açıksa gösterilir -->
+    <div class="sidebar-bottom" th:if="${session.aktifKullanici != null}">
+        <a href="/cikis" class="logout-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg> Çıkış Yap</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="top-header">
+        <!-- GÜNCELLENDİ: Kullanıcı simgesi de sadece giriş yapıldıysa görünür -->
+        <div class="user-profile" th:if="${session.aktifKullanici != null}">
+            <div class="user-avatar"><svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+            <span>Hoş Geldiniz ˅</span>
+        </div>
+    </div>
+
+    <div class="content-body">
+
+        <div class="info-banner">
+            <h1>İletişim & Destek</h1>
+            <p>Sistemle veya rezervasyonlarınızla ilgili her türlü soru ve destek talebiniz için bize ulaşabilirsiniz.</p>
+        </div>
+
+        <div class="cards-container">
+            <div class="selection-card">
+                <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+                <h3>İletişim Bilgileri</h3>
+                <p>Mesai saatleri içerisinde çağrı merkezimizden veya e-posta adresimizden destek alabilirsiniz.</p>
+                <div class="contact-details">
+                    <div class="contact-row"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg><strong>Tel:</strong> 0312 XXX XX XX</div>
+                    <div class="contact-row"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg><strong>E-posta:</strong> misafirhane@ogm.gov.tr</div>
+                </div>
+            </div>
+
+            <div class="selection-card highlight">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 11.5v-1c0-1.1-.9-2-2-2h-1V6c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v2.5H5c-1.1 0-2 .9-2 2v1c0 1.1.9 2 2 2h1v2c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-2h1c1.1 0 2-.9 2-2zM15 17H9v-2h6v2zm1.5-6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM7.5 10.5c-.83 0-1.5-.67-1.5-1.5S6.67 7.5 7.5 7.5 9 8.17 9 9s-.67 1.5-1.5 1.5z"/></svg>
+                </div>
+                <h3>Canlı Asistan</h3>
+                <p>Yapay zeka destekli asistanımız ile rezervasyon, fiyatlar ve sistem kuralları hakkında anında çözüm bulun.</p>
+                <button class="select-btn" onclick="toggleChat()">Sohbete Başla →</button>
+            </div>
+        </div>
+
+        <svg class="tree-background" viewBox="0 0 500 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M320 800V420L295 450L275 410L250 450L220 395L190 440L150 380L110 450L70 370L20 480V800H320Z" fill="#7fa98c"/>
+            <path d="M420 800V310L395 345L375 305L350 345L325 290L295 335L260 270L220 340L180 260L130 360L80 430V800H420Z" fill="#699677"/>
+            <path d="M480 800V240L455 275L435 235L410 275L385 220L355 265L320 200L280 270L240 190L190 290L140 370L100 450L70 520V800H480Z" fill="#588566"/>
+            <path d="M500 800V150L465 200L435 145L400 195L365 130L325 185L285 110L235 190L185 100L130 210L80 310L40 400L20 500V800H500Z" fill="#477355"/>
+        </svg>
+    </div>
+</div>
+
+<!-- CANLI ASİSTAN SOHBET PENCERESİ (WIDGET) -->
+<div class="chat-widget" id="chatWidget">
+    <div class="chat-header">
+        <div class="chat-header-info">
+            <svg viewBox="0 0 24 24"><path d="M21 11.5v-1c0-1.1-.9-2-2-2h-1V6c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v2.5H5c-1.1 0-2 .9-2 2v1c0 1.1.9 2 2 2h1v2c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-2h1c1.1 0 2-.9 2-2zM15 17H9v-2h6v2zm1.5-6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM7.5 10.5c-.83 0-1.5-.67-1.5-1.5S6.67 7.5 7.5 7.5 9 8.17 9 9s-.67 1.5-1.5 1.5z"/></svg>
+            <div>
+                <h4>OGM Asistan</h4>
+                <span>Çevrimiçi</span>
+            </div>
+        </div>
+        <button class="close-chat" onclick="toggleChat()">×</button>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <div class="message msg-bot">
+            Merhaba! OGM Misafirhanesi asistanına hoş geldiniz. Size nasıl yardımcı olabilirim? Aşağıdaki hızlı işlemlerden birini seçebilir veya sorunuzu yazabilirsiniz.
+            <div class="chat-quick-replies">
+                <button class="qr-btn" onclick="sendQuickReply('Oda Fiyatları')">Oda Fiyatları</button>
+                <button class="qr-btn" onclick="sendQuickReply('İndirimler')">İndirimler</button>
+                <button class="qr-btn" onclick="sendQuickReply('İptal Şartları')">İptal Şartları</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <input type="text" id="userInput" placeholder="Mesajınızı yazın..." onkeypress="handleKeyPress(event)">
+        <button class="chat-send-btn" onclick="sendMessage()">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+    </div>
+</div>
+
+<!-- JAVASCRIPT: Güncellenmiş Kural Tabanlı Bot -->
+<script>
+    function toggleChat() {
+        const chatWidget = document.getElementById('chatWidget');
+        chatWidget.style.display = chatWidget.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    function sendQuickReply(text) {
+        document.getElementById('userInput').value = text;
+        sendMessage();
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('userInput');
+        const message = input.value.trim();
+        if (message === '') return;
+
+        appendMessage(message, 'msg-user');
+        input.value = '';
+
+        setTimeout(() => {
+            const response = getBotResponse(message);
+            appendMessage(response, 'msg-bot');
+        }, 500);
+    }
+
+    function appendMessage(text, className) {
+        const chatMessages = document.getElementById('chatMessages');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${className}`;
+        msgDiv.innerHTML = text;
+        chatMessages.appendChild(msgDiv);
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function getBotResponse(rawInput) {
+        const input = rawInput.toLocaleLowerCase('tr-TR');
+
+        if (input.includes('fiyat') || input.includes('ücret') || input.includes('kaç para')) {
+            return "Güncel taban fiyatlarımız:<br>- Standart Oda: 1000 ₺<br>- Suit Oda: 1800 ₺<br>- Aile Odası: 2500 ₺'dir.<br><br><i>(Personel ve Yakın indirimleri bu fiyatlara dahil değildir.)</i>";
+        }
+        else if (input.includes('indirim') || input.includes('personel') || input.includes('yakın')) {
+            return "<b>Misafir</b> girişlerinde standart fiyatlar geçerlidir.<br><br><b>Personel</b> girişlerinde tüm odalarda %50, <b>Personel Yakını</b> girişlerinde ise %25 oranında indirim uygulanmaktadır. Seçtiğiniz giriş türüne göre sistem fiyatı otomatik hesaplar.";
+        }
+        else if (input.includes('iptal') || input.includes('iade')) {
+            return "Rezervasyonunuzu oluşturduktan sonra sistemdeki <b>'Rezervasyonlarım'</b> sekmesine giderek ilgili kaydın yanındaki <b>'İptal Talebi'</b> butonuna basabilirsiniz. Talebiniz anında yönetime iletilerek işleme alınacaktır.";
+        }
+        else if (input.includes('saat') || input.includes('giriş') || input.includes('çıkış') || input.includes('check')) {
+            return "Misafirhanemize giriş (check-in) saati en erken 14:00, çıkış (check-out) saati ise en geç 11:00'dir.";
+        }
+        else if (input.includes('merhaba') || input.includes('selam')) {
+            return "Merhaba! Size misafirhanemizle ilgili nasıl yardımcı olabilirim?";
+        }
+        else if (input.includes('teşekkür') || input.includes('sağol')) {
+            return "Rica ederim, başka bir sorunuz olursa buradayım. İyi günler dileriz!";
+        }
+        else {
+            return "Üzgünüm, sorunuzu tam anlayamadım. Size oda fiyatları, indirimler veya iptal işlemleri hakkında otomatik bilgi verebilirim.<br><br>Farklı ve daha detaylı bir sorunuz varsa sol taraftaki <b>İletişim Bilgileri</b> (Tel: 0312 XXX XX XX, E-posta: misafirhane@ogm.gov.tr) üzerinden bize ulaşabilirsiniz.";
+        }
+    }
+</script>
+</body>
+</html>

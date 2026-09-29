@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:replace="~{fragments/header :: head('Fiyat Düzenle')}"></th:block>
+</head>
+
+<body style="background:var(--gray-100);">
+<div class="panel-layout">
+
+  <!-- Sidebar -->
+  <div th:replace="~{fragments/sidebar :: sidebar('fiyat')}"></div>
+
+  <!-- Sağ İçerik -->
+  <div class="panel-content">
+
+    <!-- Üst Bar -->
+    <div th:replace="~{fragments/header :: panel-topbar('OGM Misafirhane Rezervasyon Portalı', 'Yönetici')}"></div>
+
+    <!-- Ana İçerik -->
+    <main class="panel-main" role="main" id="main-content">
+
+      <!-- Breadcrumb / Geri Butonu -->
+      <div style="margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;">
+        <a href="/fiyat"
+           class="btn-ogm btn-ogm-ghost btn-sm"
+           style="display:inline-flex;align-items:center;gap:5px;">
+          <i class="bi bi-arrow-left"></i> Fiyat Listesine Dön
+        </a>
+        <div style="height:18px;width:1px;background:var(--gray-300);"></div>
+        <nav aria-label="Sayfa Konumu">
+          <ol style="list-style:none;display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--gray-500);margin:0;padding:0;">
+            <li><a href="/dashboard" style="color:var(--ogm-600);">Ana Panel</a></li>
+            <li><i class="bi bi-chevron-right" style="font-size:.65rem;"></i></li>
+            <li><a href="/fiyat" style="color:var(--ogm-600);">Fiyat Yönetimi</a></li>
+            <li><i class="bi bi-chevron-right" style="font-size:.65rem;"></i></li>
+            <li th:text="${isEdit} ? 'Fiyat Düzenle' : 'Yeni Fiyat Ekle'">Fiyat Düzenle</li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- Sayfa Başlığı -->
+      <div class="page-header" style="margin-bottom:1.25rem;">
+        <div>
+          <h1 class="page-title" th:text="${isEdit} ? 'Fiyat Bilgisini Düzenle' : 'Yeni Fiyat Ekle'">
+            Fiyat Bilgisini Düzenle
+          </h1>
+          <p class="page-subtitle">Tüm alanları eksiksiz doldurunuz. (*) ile işaretliler zorunludur.</p>
+        </div>
+      </div>
+
+      <!-- Form Kartı -->
+      <div style="max-width:720px;">
+        <div class="table-card">
+
+          <!-- Kart Başlığı -->
+          <div class="table-card-head"
+               style="background:var(--ogm-900);padding:1rem 1.5rem;">
+            <span style="color:#fff;font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:8px;">
+              <i class="bi bi-currency-dollar"></i>
+              <span th:text="${isEdit} ? 'Fiyat Düzenleme Formu' : 'Yeni Fiyat Tanımlama'">
+                Fiyat Düzenleme Formu
+              </span>
+            </span>
+            <span style="color:rgba(255,255,255,.55);font-size:.78rem;"
+                  th:text="${isEdit and fiyatId != null} ? 'Kayıt #' + ${fiyatId} : 'Yeni Kayıt'">
+              Yeni Kayıt
+            </span>
+          </div>
+
+          <!-- Form Gövdesi -->
+          <div style="padding:1.75rem;">
+            <form id="fiyatDuzenleForm"
+                  th:action="@{/fiyat/kaydet}" method="post"
+                  novalidate autocomplete="off">
+
+              <!-- Hidden ID (düzenleme için) -->
+              <input type="hidden" id="fiyatId" name="fiyatId"
+                     th:value="${fiyatId}" th:if="${isEdit}"/>
+
+              <!-- Bölüm 1: Oda & Misafir Bilgileri -->
+              <div style="margin-bottom:1.5rem;">
+                <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                            color:var(--gray-500);margin-bottom:1rem;padding-bottom:.6rem;
+                            border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:6px;">
+                  <i class="bi bi-building" style="color:var(--ogm-600);"></i>
+                  Oda &amp; Misafir Tanımı
+                </div>
+
+                <div class="form-grid-2">
+
+                  <div class="form-group">
+                    <label class="ogm-label" for="odaTipi">
+                      <span class="req">*</span> Oda Tipi
+                    </label>
+                    <select class="ogm-select" id="odaTipi" name="odaTipi"
+                            aria-required="true" onchange="updateFiyatOneri()">
+                      <option value="">— Oda tipini seçiniz —</option>
+                      <option value="Tek Kişilik" data-fiyat="750">🛏 Tek Kişilik (Standart, 18 m²)</option>
+                      <option value="Çift Kişilik" data-fiyat="1200">🛏🛏 Çift Kişilik (Standart, 24 m²)</option>
+                      <option value="Suit" data-fiyat="2500">⭐ Suit (Lüks, 48 m²)</option>
+                      <option value="Aile" data-fiyat="1800">👨‍👩‍👧 Aile Odası (36 m²)</option>
+                    </select>
+                    <div id="odaTipiError" class="field-error" role="alert"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="ogm-label" for="misafirTipi">
+                      <span class="req">*</span> Misafir Tipi
+                    </label>
+                    <select class="ogm-select" id="misafirTipi" name="misafirTipi"
+                            aria-required="true" onchange="updateFiyatOneri()">
+                      <option value="">— Misafir tipini seçiniz —</option>
+                      <option value="OGM Personeli">
+                        <i class="bi bi-tree"></i> OGM Personeli
+                      </option>
+                      <option value="Kamu Personeli">Kamu Personeli</option>
+                      <option value="Sivil Misafir">Sivil Misafir</option>
+                    </select>
+                    <div id="misafirTipiError" class="field-error" role="alert"></div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Bölüm 2: Geçerlilik Tarihleri -->
+              <div style="margin-bottom:1.5rem;">
+                <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                            color:var(--gray-500);margin-bottom:1rem;padding-bottom:.6rem;
+                            border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:6px;">
+                  <i class="bi bi-calendar-range" style="color:var(--ogm-600);"></i>
+                  Geçerlilik Dönemi
+                </div>
+
+                <div class="form-grid-2">
+
+                  <div class="form-group">
+                    <label class="ogm-label" for="basTarih">
+                      <span class="req">*</span> Başlangıç Tarihi
+                    </label>
+                    <input type="date" class="ogm-input-light"
+                           id="basTarih" name="basTarih"
+                           aria-required="true"
+                           onchange="validateTarihAralik()"/>
+                    <div id="basTarihError" class="field-error" role="alert"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="ogm-label" for="bitisTarih">
+                      <span class="req">*</span> Bitiş Tarihi
+                    </label>
+                    <input type="date" class="ogm-input-light"
+                           id="bitisTarih" name="bitisTarih"
+                           aria-required="true"
+                           onchange="validateTarihAralik()"/>
+                    <div id="bitisTarihError" class="field-error" role="alert"></div>
+                  </div>
+
+                </div>
+
+                <!-- Süre bilgisi -->
+                <div id="tarihBilgi"
+                     style="display:none;background:var(--ogm-50);border:1px solid var(--ogm-200);
+                            border-radius:var(--r-sm);padding:.6rem .9rem;font-size:.8rem;color:var(--ogm-700);
+                            margin-top:.5rem;">
+                  <i class="bi bi-info-circle"></i>
+                  <span id="tarihBilgiText"></span>
+                </div>
+
+              </div>
+
+              <!-- Bölüm 3: Fiyat Bilgileri -->
+              <div style="margin-bottom:1.5rem;">
+                <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                            color:var(--gray-500);margin-bottom:1rem;padding-bottom:.6rem;
+                            border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:6px;">
+                  <i class="bi bi-cash-coin" style="color:var(--ogm-600);"></i>
+                  Fiyat Bilgisi
+                </div>
+
+                <div class="form-grid-2">
+
+                  <div class="form-group">
+                    <label class="ogm-label" for="gunlukFiyat">
+                      <span class="req">*</span> Günlük Fiyat (₺)
+                    </label>
+                    <div style="position:relative;">
+                      <span style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);
+                                   font-weight:700;color:var(--gray-600);font-size:.87rem;">₺</span>
+                      <input type="number" class="ogm-input-light"
+                             id="gunlukFiyat" name="gunlukFiyat"
+                             min="1" max="99999" step="50"
+                             placeholder="0.00"
+                             style="padding-left:1.8rem;"
+                             aria-required="true"
+                             oninput="calcToplamFiyat()"/>
+                    </div>
+                    <!-- Önerilen Fiyat -->
+                    <div id="fiyatOneri"
+                         style="display:none;margin-top:4px;font-size:.73rem;color:var(--gray-500);">
+                      Önerilen fiyat: <a id="fiyatOneriLink" href="#" onclick="setOneri(event)"
+                                          style="color:var(--ogm-600);font-weight:600;"></a>
+                    </div>
+                    <div id="gunlukFiyatError" class="field-error" role="alert"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="ogm-label" for="durum">Durum</label>
+                    <select class="ogm-select" id="durum" name="durum">
+                      <option value="Aktif" selected>● Aktif</option>
+                      <option value="Pasif">○ Pasif</option>
+                    </select>
+                    <div style="margin-top:6px;font-size:.73rem;color:var(--gray-500);">
+                      Pasif fiyatlar sisteme yansımaz.
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
+              <!-- Fiyat Özet Kutusu -->
+              <div id="fiyatOzet"
+                   style="display:none;background:var(--ogm-900);border-radius:var(--r);
+                          padding:1rem 1.25rem;margin-bottom:1.5rem;">
+                <div style="color:rgba(255,255,255,.65);font-size:.73rem;font-weight:600;
+                            text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">
+                  Fiyat Özeti
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+                  <div>
+                    <div style="font-size:.85rem;color:rgba(255,255,255,.8);" id="ozetOda">— / —</div>
+                    <div style="font-size:.72rem;color:rgba(255,255,255,.5);" id="ozetTarih">Tarih belirtilmedi</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-size:1.4rem;font-weight:800;color:#fff;" id="ozetFiyat">₺ —</div>
+                    <div style="font-size:.72rem;color:rgba(255,255,255,.55);">/ gece</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Butonları -->
+              <div style="display:flex;align-items:center;justify-content:space-between;
+                          padding-top:1.25rem;border-top:1px solid var(--gray-200);flex-wrap:wrap;gap:.75rem;">
+                <a href="/fiyat" class="btn-ogm btn-ogm-ghost">
+                  ← İptal
+                </a>
+                <button type="submit" class="btn-ogm btn-ogm-primary"
+                        id="submitBtn" onclick="validateAndSubmit(event)"
+                        style="min-width:180px;">
+                  <i class="bi bi-check-lg"></i>
+                  <span th:text="${isEdit} ? 'Değişiklikleri Kaydet' : 'Fiyatı Ekle'">Fiyatı Ekle</span>
+                </button>
+              </div>
+
+            </form>
+          </div><!-- /padding -->
+
+        </div><!-- /table-card -->
+      </div><!-- /max-width -->
+
+    </main>
+
+    <div th:replace="~{fragments/footer :: panel-footer}"></div>
+  </div>
+</div><!-- /panel-layout -->
+
+
+<!-- JS -->
+<th:block th:replace="~{fragments/header :: scripts}"></th:block>
+<script>
+'use strict';
+
+// Önerilen fiyatlar (oda tipi + misafir tipi kombinasyonu)
+const ONERI_FIYATLAR = {
+  'Tek Kişilik_OGM Personeli':  750,
+  'Tek Kişilik_Kamu Personeli': 900,
+  'Tek Kişilik_Sivil Misafir':  1100,
+  'Çift Kişilik_OGM Personeli': 1200,
+  'Çift Kişilik_Kamu Personeli':1400,
+  'Çift Kişilik_Sivil Misafir': 1600,
+  'Suit_OGM Personeli':         2000,
+  'Suit_Kamu Personeli':        2200,
+  'Suit_Sivil Misafir':         2500,
+  'Aile_OGM Personeli':         1600,
+  'Aile_Kamu Personeli':        1900,
+  'Aile_Sivil Misafir':         2200,
+};
+
+let _oneriDeger = 0;
+
+function updateFiyatOneri() {
+  const oda     = document.getElementById('odaTipi')?.value;
+  const misafir = document.getElementById('misafirTipi')?.value;
+  const oneri   = ONERI_FIYATLAR[`${oda}_${misafir}`];
+
+  const oneriDiv  = document.getElementById('fiyatOneri');
+  const oneriLink = document.getElementById('fiyatOneriLink');
+
+  if (oneri && oneriDiv && oneriLink) {
+    _oneriDeger = oneri;
+    oneriLink.textContent = `₺${oneri.toLocaleString('tr-TR')}`;
+    oneriDiv.style.display = 'block';
+  } else if (oneriDiv) {
+    oneriDiv.style.display = 'none';
+  }
+
+  calcToplamFiyat();
+  updateOzet();
+}
+
+function setOneri(e) {
+  e.preventDefault();
+  const input = document.getElementById('gunlukFiyat');
+  if (input && _oneriDeger) {
+    input.value = _oneriDeger;
+    calcToplamFiyat();
+    updateOzet();
+  }
+}
+
+function calcToplamFiyat() {
+  updateOzet();
+}
+
+function updateOzet() {
+  const oda      = document.getElementById('odaTipi')?.value;
+  const misafir  = document.getElementById('misafirTipi')?.value;
+  const fiyat    = parseFloat(document.getElementById('gunlukFiyat')?.value);
+  const bas      = document.getElementById('basTarih')?.value;
+  const bitis    = document.getElementById('bitisTarih')?.value;
+
+  const ozetDiv = document.getElementById('fiyatOzet');
+  if (!ozetDiv) return;
+
+  if (oda && misafir && fiyat > 0) {
+    ozetDiv.style.display = 'block';
+    const ozetOdaEl  = document.getElementById('ozetOda');
+    const ozetFiyat  = document.getElementById('ozetFiyat');
+    const ozetTarih  = document.getElementById('ozetTarih');
+
+    if (ozetOdaEl) ozetOdaEl.textContent = `${oda} — ${misafir}`;
+    if (ozetFiyat) ozetFiyat.textContent = `₺${fiyat.toLocaleString('tr-TR')}`;
+
+    if (bas && bitis && ozetTarih) {
+      const basDt   = new Date(bas);
+      const bitisDt = new Date(bitis);
+      const gun     = Math.ceil((bitisDt - basDt) / 86400000);
+      if (gun > 0) {
+        const fmt = { day: '2-digit', month: 'long', year: 'numeric' };
+        ozetTarih.textContent = `${basDt.toLocaleDateString('tr-TR', fmt)} — ${bitisDt.toLocaleDateString('tr-TR', fmt)} (${gun} gün)`;
+      }
+    }
+  } else {
+    ozetDiv.style.display = 'none';
+  }
+}
+
+function validateTarihAralik() {
+  const bas    = document.getElementById('basTarih')?.value;
+  const bitis  = document.getElementById('bitisTarih')?.value;
+  const bilgi  = document.getElementById('tarihBilgi');
+  const bilgiT = document.getElementById('tarihBilgiText');
+
+  if (bas && bitis) {
+    const basDt   = new Date(bas);
+    const bitisDt = new Date(bitis);
+
+    if (basDt > bitisDt) {
+      document.getElementById('bitisTarihError').textContent = 'Bitiş tarihi başlangıç tarihinden önce olamaz.';
+      document.getElementById('bitisTarihError').style.display = 'block';
+      document.getElementById('bitisTarih').classList.add('is-invalid');
+      if (bilgi) bilgi.style.display = 'none';
+    } else {
+      document.getElementById('bitisTarihError').style.display = 'none';
+      document.getElementById('bitisTarih').classList.remove('is-invalid');
+
+      const gun = Math.ceil((bitisDt - basDt) / 86400000);
+      if (bilgi && bilgiT) {
+        bilgiT.textContent = `Seçilen dönem: ${gun} gün geçerli olacak.`;
+        bilgi.style.display = 'block';
+      }
+    }
+  }
+
+  updateOzet();
+}
+
+function validateAndSubmit(e) {
+  e.preventDefault();
+  let valid = true;
+
+  const checks = [
+    { id: 'odaTipi',     errId: 'odaTipiError',     test: v => !!v,           msg: 'Oda tipi seçiniz.' },
+    { id: 'misafirTipi', errId: 'misafirTipiError',  test: v => !!v,           msg: 'Misafir tipi seçiniz.' },
+    { id: 'basTarih',    errId: 'basTarihError',     test: v => !!v,           msg: 'Başlangıç tarihi giriniz.' },
+    { id: 'bitisTarih',  errId: 'bitisTarihError',   test: v => !!v,           msg: 'Bitiş tarihi giriniz.' },
+    { id: 'gunlukFiyat', errId: 'gunlukFiyatError',  test: v => parseFloat(v) > 0, msg: 'Geçerli bir fiyat giriniz.' },
+  ];
+
+  checks.forEach(c => {
+    const el  = document.getElementById(c.id);
+    const err = document.getElementById(c.errId);
+    if (!el) return;
+    if (!c.test(el.value)) {
+      el.classList.add('is-invalid');
+      if (err) { err.textContent = c.msg; err.style.display = 'block'; }
+      valid = false;
+    } else {
+      el.classList.remove('is-invalid');
+      if (err) err.style.display = 'none';
+    }
+  });
+
+  if (valid) {
+    const btn = document.getElementById('submitBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span>Kaydediliyor…</span>'; }
+    showToast('Fiyat bilgisi kaydediliyor…', 'info');
+    setTimeout(() => { window.location.href = '/fiyat?kayit=basarili'; }, 1200);
+  }
+}
+
+function showToast(message, type = 'success') {
+  document.getElementById('ogm-toast')?.remove();
+  const pal = { success:'#276e31', error:'#c62828', info:'#1565c0', warn:'#b45309' };
+  const ico = { success:'bi-check-circle-fill', error:'bi-x-circle-fill', info:'bi-info-circle-fill', warn:'bi-exclamation-triangle-fill' };
+  const t   = document.createElement('div');
+  t.id = 'ogm-toast';
+  t.className = 'ogm-toast';
+  t.style.background = pal[type];
+  t.innerHTML = `<i class="bi ${ico[type]}" style="font-size:1rem;flex-shrink:0;"></i><span>${message}</span>`;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .35s'; setTimeout(()=>t.remove(),350); }, 3500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Mevcut değerler varsa özeti göster
+  updateFiyatOneri();
+  validateTarihAralik();
+});
+</script>
+</body>
+</html>

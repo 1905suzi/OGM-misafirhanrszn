@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+
+<aside class="panel-sidebar" th:fragment="sidebar(activeMenu)" role="navigation" aria-label="Ana Menü" style="background:#14361e; color:white; padding:1.5rem; display:flex; flex-direction:column; justify-content:space-between; width:260px; min-height:100vh;">
+
+  <!-- ÜST GRUP (Logo ve Menüler) -->
+  <div>
+    <!-- Logo ve Başlık -->
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+      <img src="/images/ogm-logo.png" alt="OGM Logo" style="width: 50px; height: 50px; object-fit: contain; margin-bottom: 0.5rem;">
+      <div style="font-weight: 700; font-size: 0.95rem; line-height: 1.2; color: white;">
+        OGM MİSAFİRHANE
+      </div>
+      <div style="font-size: 0.75rem; color: #a3c1ad; margin-top: 2px;">Üye Portalı</div>
+    </div>
+
+    <!-- Menü Linkleri -->
+    <nav style="display: flex; flex-direction: column; gap: 0.5rem;">
+
+      <!-- Ana Sayfa -->
+      <a href="/dashboard" th:style="${activeMenu == 'dashboard'} ? 'background: #245332; color: white; padding: 0.75rem 1rem; border-radius: 8px; display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; font-size: 0.88rem;' : 'color: white; padding: 0.75rem 1rem; border-radius: 8px; display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 0.88rem;'">
+        <i class="bi bi-house-door" style="font-size: 1.1rem;"></i> Ana Sayfa
+      </a>
+
+      <!-- Rezervasyon Oluştur Linki -->
+      <a href="/rezervasyon-olustur" th:style="${activeMenu == 'rezervasyon'} ? 'background: #245332; ...' : '...'">
+        <i class="bi bi-calendar-plus" style="font-size: 1.1rem;"></i> Rezervasyon Oluştur
+      </a>
+
+      <!-- Diğer Menü Elemanları -->
+      <a href="/rezervasyonlarim" class="nav-link ...">
+        <i class="bi bi-list-check"></i> Rezervasyonlarım
+      </a>
+
+      <!-- İletişim -->
+      <a href="/iletisim" th:classappend="${activeMenu == 'iletisim' ? 'active' : ''}" class="nav-link" style="...">
+        <i class="bi bi-envelope" style="font-size: 1.2rem;"></i> İletişim
+      </a>
+
+    </nav>
+  </div> <!-- ÜST GRUBUN KAPANIŞI BURADA OLMALI -->
+
+
+  <!-- ALT GRUP (Çıkış Yap) -->
+  <!-- Kapsayıcıdaki justify-content:space-between sayesinde bu buton artık en alta yapışacak -->
+  <a href="/cikis" class="nav-link" style="display: flex; align-items: center; gap: 12px; color: white; text-decoration: none; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+    <i class="bi bi-box-arrow-right" style="font-size: 1.2rem;"></i> Çıkış Yap
+  </a>
+
+</aside>
+
+</body>
+</html>

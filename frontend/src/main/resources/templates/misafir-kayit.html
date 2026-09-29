@@ -1,0 +1,306 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OGM Misafirhane - Misafir Kayıt</title>
+    <style>
+        /* Genel Ayarlar */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f6f8f7; overflow: hidden; }
+
+        /* SOL SIDEBAR (Koyu Yeşil) */
+        .sidebar {
+            width: 260px;
+            background-color: #163a22;
+            display: flex; flex-direction: column;
+            color: white; z-index: 20;
+        }
+
+        .sidebar-top { padding-top: 2rem; }
+
+        .logo-area { text-align: center; margin-bottom: 2rem; }
+        .logo-area img {
+            width: 85px; height: 85px; object-fit: contain;
+            background: white; border-radius: 50%; padding: 4px;
+            margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .logo-area h2 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
+        .logo-area p { font-size: 0.8rem; color: #8bb197; margin-top: 2px; }
+
+        .menu { display: flex; flex-direction: column; gap: 5px; }
+        .menu-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 20px; color: #a8c1b1; text-decoration: none;
+            font-size: 0.95rem; transition: all 0.2s;
+        }
+        .menu-item svg { width: 18px; height: 18px; fill: currentColor; }
+
+        .menu-item.active {
+            background-color: #21472e; color: white;
+            border-left: 4px solid #8fbc9f;
+        }
+        .menu-item:hover:not(.active) { color: white; background-color: rgba(255,255,255,0.05); }
+
+        .sidebar-bottom { margin-top: auto; padding: 20px 20px 30px; }
+        .logout-btn {
+            display: flex; align-items: center; gap: 10px;
+            color: #d1dcd5; text-decoration: none; font-size: 0.95rem;
+        }
+
+        /* ANA İÇERİK ALANI */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1;
+        }
+
+        /* ÜST BAŞLIK */
+        .top-header {
+            height: 70px; background: white;
+            display: flex; justify-content: flex-end; align-items: center;
+            padding: 0 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); z-index: 20;
+        }
+        .user-profile {
+            display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; color: #333;
+        }
+        .user-avatar {
+            width: 32px; height: 32px; background-color: #163a22; color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ORTA İÇERİK (Form Alanı) */
+        .content-body {
+            flex: 1; padding: 3rem; display: flex; flex-direction: column;
+            align-items: center; position: relative; z-index: 2;
+        }
+
+        /* FORM KARTI */
+        .form-card {
+            background: white;
+            width: 100%;
+            max-width: 850px;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* FORM ÜST BİLGİ ALANI (Koyu Yeşil Kutu) */
+        .form-header-box {
+            background-color: #1a3b25;
+            border-radius: 8px;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .form-header-icon {
+            width: 40px; height: 40px;
+            background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .form-header-icon svg { width: 22px; height: 22px; fill: #1a3b25; }
+
+        .form-header-text h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 4px; }
+        .form-header-text p { font-size: 0.85rem; color: #a8c1b1; }
+
+        /* FORM IZGARASI VE ELEMANLARI */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group.full-width { grid-column: span 2; }
+
+        .form-label {
+            display: block; font-size: 0.9rem; font-weight: 600;
+            color: #333; margin-bottom: 8px;
+        }
+
+        .form-label .required { color: #d9534f; margin-right: 4px; }
+
+        .input-wrapper { position: relative; }
+
+        .input-icon {
+            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            width: 18px; height: 18px; fill: white; pointer-events: none;
+        }
+
+        .form-input {
+            width: 100%;
+            background-color: #2b5b3b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 15px 12px 42px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+
+        .form-input::placeholder { color: #a3c1ad; opacity: 1; }
+        .form-input:focus { box-shadow: 0 0 0 2px #4caf50; }
+
+        /* BUTONLAR */
+        .form-actions { display: flex; justify-content: space-between; align-items: center; }
+
+        .btn-back {
+            background: white; border: 1px solid #555; color: #333;
+            padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 0.9rem;
+            font-weight: 500; cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px;
+            transition: background 0.2s;
+        }
+        .btn-back:hover { background: #f0f0f0; }
+
+        .btn-next {
+            background: #1a3b25; border: none; color: white;
+            padding: 0.7rem 2rem; border-radius: 6px; font-size: 0.9rem;
+            font-weight: 500; cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px;
+            transition: background 0.2s;
+        }
+        .btn-next:hover { background: #122a1a; }
+
+        /* YUMUŞAK, GERÇEKÇİ SULUBOYA ÇAM AĞACI DESENİ (SAĞ ALT) */
+        .tree-background {
+            position: absolute;
+            bottom: -20px; right: -20px;
+            width: 550px; height: 800px;
+            z-index: 0; pointer-events: none; overflow: hidden;
+            filter: blur(10px) opacity(0.25); mix-blend-mode: multiply;
+        }
+    </style>
+</head>
+<body>
+
+<!-- SOL SIDEBAR -->
+<div class="sidebar">
+    <div class="sidebar-top">
+        <div class="logo-area">
+            <img th:src="@{/images/ogm-logo.png}" alt="OGM Logo">
+            <h2>OGM MİSAFİRHANE</h2>
+            <p>Rezervasyon Portalı</p>
+        </div>
+        <div class="menu">
+            <a href="/giris" class="menu-item active">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                Ana Sayfa
+            </a>
+            <a href="/iletisim" class="menu-item">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                İletişim
+            </a>
+        </div>
+    </div>
+    <div class="sidebar-bottom">
+        <a href="/cikis" class="logout-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Çıkış Yap
+        </a>
+    </div>
+</div>
+
+<!-- SAĞ İÇERİK -->
+<div class="main-content">
+    <!-- ÜST HEADER -->
+    <div class="top-header">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+            <span>Misafir ˅</span>
+        </div>
+    </div>
+
+    <!-- ORTA KISIM -->
+    <div class="content-body">
+
+        <!-- FORM KARTI -->
+        <div class="form-card">
+
+            <div class="form-header-box">
+                <div class="form-header-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div class="form-header-text">
+                    <h2>Misafir Bilgileri</h2>
+                    <p>Lütfen bilgilerinizi eksiksiz doldurunuz</p>
+                </div>
+            </div>
+
+            <!-- DÜZELTİLEN KISIM: action özelliği "/konaklama" olarak güncellendi -->
+            <form action="/konaklama" method="get">
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label class="form-label"><span class="required">*</span> T.C. Kimlik No</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            <input type="text" class="form-input" placeholder="T.C. Kimlik Numaranız" maxlength="11">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><span class="required">*</span> Ad Soyad</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            <input type="text" class="form-input" placeholder="Ad ve Soyadınız">
+                        </div>
+                    </div>
+
+                    <!-- Doğum Tarihi -->
+                    <div class="form-group">
+                        <label class="form-label"><span class="required">*</span> Doğum Tarihi</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+                            <input type="date" class="form-input" style="color-scheme: dark">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><span class="required">*</span> Telefon</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                            <input type="tel" class="form-input" placeholder="05XX XXX XX XX">
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label"><span class="required">*</span> E-posta</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                            <input type="email" class="form-input" placeholder="ornek@email.com">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Aksiyon Butonları -->
+                <div class="form-actions">
+                    <a th:href="@{/giris}" class="btn-back">← Geri Dön</a>
+                    <button type="submit" class="btn-next">İleri →</button>
+                </div>
+            </form>
+
+        </div>
+
+        <!-- Softlaştırılmış Katmanlı Arka Plan Ağaç SVG'si -->
+        <svg class="tree-background" viewBox="0 0 500 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Arka Katman -->
+            <path d="M320 800V420L295 450L275 410L250 450L220 395L190 440L150 380L110 450L70 370L20 480V800H320Z" fill="#7fa98c"/>
+            <path d="M420 800V310L395 345L375 305L350 345L325 290L295 335L260 270L220 340L180 260L130 360L80 430V800H420Z" fill="#699677"/>
+            <!-- Ön Katman -->
+            <path d="M480 800V240L455 275L435 235L410 275L385 220L355 265L320 200L280 270L240 190L190 290L140 370L100 450L70 520V800H480Z" fill="#588566"/>
+            <path d="M500 800V150L465 200L435 145L400 195L365 130L325 185L285 110L235 190L185 100L130 210L80 310L40 400L20 500V800H500Z" fill="#477355"/>
+        </svg>
+    </div>
+</div>
+
+</body>
+</html>

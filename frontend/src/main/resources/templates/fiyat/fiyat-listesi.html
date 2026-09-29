@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:replace="~{fragments/header :: head('Fiyat Yönetimi')}"></th:block>
+</head>
+
+<body style="background:var(--gray-100);">
+<div class="panel-layout">
+
+  <!-- Sol Sidebar -->
+  <div th:replace="~{fragments/sidebar :: sidebar('fiyat')}"></div>
+
+  <!-- Sağ İçerik -->
+  <div class="panel-content">
+
+    <!-- Üst Bar -->
+    <div th:replace="~{fragments/header :: panel-topbar('OGM Misafirhane Rezervasyon Portalı', 'Yönetici')}"></div>
+
+    <!-- Ana İçerik -->
+    <main class="panel-main" role="main" id="main-content">
+
+      <!-- Sayfa Başlığı -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Fiyat Yönetimi</h1>
+          <p class="page-subtitle">Oda tipi ve misafir türüne göre fiyat tanımlamaları</p>
+        </div>
+        <button class="btn-ogm btn-ogm-primary" onclick="openAdd()" id="yeniFiyatBtn">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          Yeni Fiyat Ekle
+        </button>
+      </div>
+
+      <!-- Fiyat Listesi Tablosu -->
+      <div class="table-card">
+
+        <!-- Tablo Başlığı & Sayaç -->
+        <div class="table-card-head">
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <span class="table-card-title">
+              <i class="bi bi-currency-dollar" style="color:var(--ogm-600);"></i>
+              Fiyat Listesi
+            </span>
+            <span class="badge badge-ogm" id="fiyatCountBadge">
+              Toplam <span id="fiyatCount">7</span> Kayıt
+            </span>
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center;">
+            <button class="btn-ogm btn-ogm-ghost btn-sm" onclick="resetFilter()" title="Filtreleri Temizle">
+              <i class="bi bi-x-circle"></i> Temizle
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtre Barı -->
+        <div class="filter-bar" role="search" aria-label="Fiyat Filtreleme">
+
+          <div class="filter-grp">
+            <span class="filter-lbl">Oda Tipi</span>
+            <select class="ogm-select" id="filterOdaTipi"
+                    style="min-width:130px;" aria-label="Oda tipine göre filtrele">
+              <option value="">Tümü</option>
+              <option value="Tek Kişilik">Tek Kişilik</option>
+              <option value="Çift Kişilik">Çift Kişilik</option>
+              <option value="Suit">Suit</option>
+              <option value="Aile">Aile</option>
+            </select>
+          </div>
+
+          <div class="filter-grp">
+            <span class="filter-lbl">Misafir Tipi</span>
+            <select class="ogm-select" id="filterMisafirTipi"
+                    style="min-width:140px;" aria-label="Misafir tipine göre filtrele">
+              <option value="">Tümü</option>
+              <option value="OGM Personeli">OGM Personeli</option>
+              <option value="Kamu Personeli">Kamu Personeli</option>
+              <option value="Sivil Misafir">Sivil Misafir</option>
+            </select>
+          </div>
+
+          <div class="filter-grp">
+            <span class="filter-lbl">Durum</span>
+            <select class="ogm-select" id="filterDurum"
+                    aria-label="Duruma göre filtrele">
+              <option value="">Tümü</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Pasif">Pasif</option>
+            </select>
+          </div>
+
+          <div class="filter-grp" style="flex:1;">
+            <span class="filter-lbl">Arama</span>
+            <div class="search-wrap">
+              <i class="bi bi-search" aria-hidden="true"></i>
+              <input type="search"
+                     class="search-input"
+                     id="aramaInput"
+                     placeholder="Oda tipi, misafir tipi, fiyat…"
+                     aria-label="Fiyat listesinde ara"/>
+            </div>
+          </div>
+
+        </div><!-- /filter-bar -->
+
+        <!-- Tablo -->
+        <div style="overflow-x:auto;">
+          <table class="ogm-table" id="fiyatTable"
+                 aria-label="Fiyat Listesi">
+            <thead>
+              <tr>
+                <th style="width:45px;">#</th>
+                <th>Oda Tipi</th>
+                <th>Misafir Tipi</th>
+                <th>Başlangıç</th>
+                <th>Bitiş</th>
+                <th>Günlük Fiyat</th>
+                <th>Durum</th>
+                <th style="width:110px;">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="fiyatTbody">
+              <!-- JavaScript ile doldurulur -->
+              <tr>
+                <td colspan="8" class="table-empty">
+                  <i class="bi bi-hourglass-split"></i>
+                  Veriler yükleniyor…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div><!-- /overflow-x -->
+
+      </div><!-- /table-card -->
+
+    </main>
+
+    <div th:replace="~{fragments/footer :: panel-footer}"></div>
+  </div><!-- /panel-content -->
+</div><!-- /panel-layout -->
+
+
+<!-- ══════════════════════════════════════════════
+     MODAL: Fiyat Ekle / Düzenle
+     ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="fiyatModal"
+     role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-box" role="document">
+
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">
+        <i class="bi bi-plus-circle"></i> Yeni Fiyat Ekle
+      </span>
+      <button class="modal-close" onclick="closeModal('fiyatModal')"
+              aria-label="Modalı Kapat">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Birinci satır: Oda Tipi + Misafir Tipi -->
+      <div class="form-grid-2" style="margin-bottom:1rem;">
+
+        <div>
+          <label class="ogm-label" for="frmOdaTipi">
+            <span class="req">*</span> Oda Tipi
+          </label>
+          <select class="ogm-select" id="frmOdaTipi"
+                  aria-required="true" aria-label="Oda tipi seçin">
+            <option value="">— Seçiniz —</option>
+            <option value="Tek Kişilik">🛏 Tek Kişilik</option>
+            <option value="Çift Kişilik">🛏🛏 Çift Kişilik</option>
+            <option value="Suit">⭐ Suit</option>
+            <option value="Aile">👨‍👩‍👧 Aile</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="ogm-label" for="frmMisafirTipi">
+            <span class="req">*</span> Misafir Tipi
+          </label>
+          <select class="ogm-select" id="frmMisafirTipi"
+                  aria-required="true" aria-label="Misafir tipi seçin">
+            <option value="">— Seçiniz —</option>
+            <option value="OGM Personeli">OGM Personeli</option>
+            <option value="Kamu Personeli">Kamu Personeli</option>
+            <option value="Sivil Misafir">Sivil Misafir</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- İkinci satır: Tarih aralığı -->
+      <div class="form-grid-2" style="margin-bottom:1rem;">
+
+        <div>
+          <label class="ogm-label" for="frmBasTarih">
+            <span class="req">*</span> Geçerlilik Başlangıç Tarihi
+          </label>
+          <input type="date" class="ogm-input-light"
+                 id="frmBasTarih"
+                 aria-required="true"/>
+        </div>
+
+        <div>
+          <label class="ogm-label" for="frmBitisTarih">
+            <span class="req">*</span> Geçerlilik Bitiş Tarihi
+          </label>
+          <input type="date" class="ogm-input-light"
+                 id="frmBitisTarih"
+                 aria-required="true"/>
+        </div>
+
+      </div>
+
+      <!-- Üçüncü satır: Fiyat + Durum -->
+      <div class="form-grid-2" style="margin-bottom:0;">
+
+        <div>
+          <label class="ogm-label" for="frmFiyat">
+            <span class="req">*</span> Günlük Fiyat (₺)
+          </label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);font-weight:700;color:var(--gray-600);font-size:.85rem;">
+              ₺
+            </span>
+            <input type="number"
+                   class="ogm-input-light"
+                   id="frmFiyat"
+                   min="1" step="50"
+                   placeholder="0.00"
+                   style="padding-left:1.8rem;"
+                   aria-required="true"
+                   aria-label="Günlük fiyat"/>
+          </div>
+        </div>
+
+        <div>
+          <label class="ogm-label" for="frmDurum">Durum</label>
+          <select class="ogm-select" id="frmDurum" aria-label="Fiyat durumu">
+            <option value="Aktif">● Aktif</option>
+            <option value="Pasif">○ Pasif</option>
+          </select>
+        </div>
+
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer">
+      <button class="btn-ogm btn-ogm-ghost" onclick="closeModal('fiyatModal')">
+        İptal
+      </button>
+      <button class="btn-ogm btn-ogm-primary" onclick="saveFiyat()">
+        <i class="bi bi-check-lg" aria-hidden="true"></i>
+        <span id="saveBtnLabel">Kaydet</span>
+      </button>
+    </div>
+
+  </div><!-- /modal-box -->
+</div><!-- /fiyatModal -->
+
+
+<!-- ══════════════════════════════════════════════
+     MODAL: Silme Onay
+     ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="deleteModal"
+     role="alertdialog" aria-modal="true"
+     aria-labelledby="deleteModalTitle" aria-describedby="deleteInfo">
+  <div class="modal-box modal-sm">
+
+    <div class="modal-header">
+      <span class="modal-title" id="deleteModalTitle"
+            style="color:var(--kirmizi);">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Silme Onayı
+      </span>
+      <button class="modal-close" onclick="closeModal('deleteModal')"
+              aria-label="İptal">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <p style="font-size:.88rem;color:var(--gray-700);line-height:1.6;"
+         id="deleteInfo">
+        Bu fiyat kaydını silmek istediğinizden emin misiniz?
+      </p>
+      <div style="margin-top:.85rem;background:var(--kirmizi-light);border:1px solid rgba(239,68,68,.2);
+                  border-radius:var(--r-sm);padding:.7rem .9rem;font-size:.8rem;color:#c62828;">
+        <i class="bi bi-info-circle"></i>
+        Bu işlem <strong>geri alınamaz</strong>. Silinen kayıt kurtarılamaz.
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ogm btn-ogm-ghost" onclick="closeModal('deleteModal')">
+        Vazgeç
+      </button>
+      <button class="btn-ogm btn-ogm-danger" onclick="confirmDelete()">
+        <i class="bi bi-trash3-fill"></i> Evet, Sil
+      </button>
+    </div>
+
+  </div>
+</div><!-- /deleteModal -->
+
+
+<!-- JS -->
+<th:block th:replace="~{fragments/header :: scripts}"></th:block>
+<script th:src="@{/js/fiyat-yonetimi.js}"></script>
+
+</body>
+</html>
