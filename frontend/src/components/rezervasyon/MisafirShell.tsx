@@ -16,6 +16,8 @@ export default function MisafirShell({
   const pathname = usePathname() || "";
   const isAktif = (path: string) => pathname.includes(path);
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   // Geri butonuyla (bfcache) gelindiğinde sayfayı yenile ki yetki kontrolü (middleware) tekrar çalışsın
   useEffect(() => {
     const handlePageShow = (event: PageTransitionEvent) => {
@@ -29,9 +31,25 @@ export default function MisafirShell({
 
   return (
     <div className="flex h-screen bg-[#f6f8f7] overflow-hidden">
+      
+      {/* MOBILE OVERLAY */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* SOL SIDEBAR */}
-      <div className="w-[260px] bg-[#163a22] flex flex-col text-white z-20">
-        <div className="pt-8">
+      <div className={`fixed md:static inset-y-0 left-0 w-[260px] bg-[#163a22] flex flex-col text-white z-50 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+        <div className="pt-8 relative">
+          <button 
+            className="absolute top-4 right-4 md:hidden text-white/70 hover:text-white"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+          
           <div className="text-center mb-8">
             <div className="w-[85px] h-[85px] bg-white rounded-full p-1 mx-auto mb-2.5 shadow-[0_4px_10px_rgba(0,0,0,0.15)] flex items-center justify-center">
               <Image
@@ -53,6 +71,7 @@ export default function MisafirShell({
           <div className="flex flex-col gap-1">
             <Link
               href={`${taban}/dashboard`}
+              onClick={() => setIsSidebarOpen(false)}
               className={`flex items-center gap-3 py-3.5 px-5 text-[0.95rem] transition-all duration-200 ${
                 isAktif("dashboard")
                   ? "bg-[#21472e] text-white border-l-4 border-[#8fbc9f]"
@@ -66,6 +85,7 @@ export default function MisafirShell({
             </Link>
             <Link
               href={`${taban}/konaklama`}
+              onClick={() => setIsSidebarOpen(false)}
               className={`flex items-center gap-3 py-3.5 px-5 text-[0.95rem] transition-all duration-200 ${
                 isAktif("konaklama") || isAktif("oda-secimi") || isAktif("on-izleme") || isAktif("odeme") || isAktif("rezervasyon-basarili")
                   ? "bg-[#21472e] text-white border-l-4 border-[#8fbc9f]"
@@ -79,6 +99,7 @@ export default function MisafirShell({
             </Link>
             <Link
               href={`${taban}/rezervasyonlarim`}
+              onClick={() => setIsSidebarOpen(false)}
               className={`flex items-center gap-3 py-3.5 px-5 text-[0.95rem] transition-all duration-200 ${
                 isAktif("rezervasyonlarim")
                   ? "bg-[#21472e] text-white border-l-4 border-[#8fbc9f]"
@@ -92,6 +113,7 @@ export default function MisafirShell({
             </Link>
             <Link
               href={`${taban}/iletisim`}
+              onClick={() => setIsSidebarOpen(false)}
               className={`flex items-center gap-3 py-3.5 px-5 text-[0.95rem] transition-all duration-200 ${
                 isAktif("iletisim")
                   ? "bg-[#21472e] text-white border-l-4 border-[#8fbc9f]"
@@ -119,24 +141,32 @@ export default function MisafirShell({
       </div>
 
       {/* SAĞ İÇERİK */}
-      <div className="flex-1 flex flex-col relative z-10">
+      <div className="flex-1 flex flex-col relative z-10 w-full md:w-auto">
         {/* ÜST HEADER */}
-        <div className="h-[70px] bg-white flex justify-between items-center px-8 shadow-[0_1px_4px_rgba(0,0,0,0.05)] z-20">
-          <div className="font-semibold text-[#1a3b25] text-[1.1rem]">
-            OGM Misafirhane Rezervasyon Portalı
+        <div className="h-[70px] bg-white flex justify-between items-center px-4 md:px-8 shadow-[0_1px_4px_rgba(0,0,0,0.05)] z-20">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden p-1.5 text-[#163a22] hover:bg-gray-100 rounded-md"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+            <div className="font-semibold text-[#1a3b25] text-[0.95rem] md:text-[1.1rem] truncate">
+              OGM Misafirhane Portalı
+            </div>
           </div>
-          <div className="flex items-center gap-2.5 text-[0.9rem] font-medium text-[#333]">
-            <div className="w-8 h-8 bg-[#163a22] text-white rounded-full flex items-center justify-center">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+          <div className="flex items-center gap-2 md:gap-2.5 text-[0.8rem] md:text-[0.9rem] font-medium text-[#333]">
+            <div className="w-7 h-7 md:w-8 md:h-8 bg-[#163a22] text-white rounded-full flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-[16px] h-[16px] md:w-[20px] md:h-[20px]" fill="white">
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-3 2c-2.67 0-8 1.34-8 4v2h16v-2c0-.42.09-.81.25-1.18-.75-.4-1.7-.68-2.85-.82H9zm11 0c-1.85 0-3.15 1.5-3.15 2.5 0 2 3.15 4.5 3.15 4.5s3.15-2.5 3.15-4.5c0-1-1.3-2.5-3.15-2.5z" />
               </svg>
             </div>
-            <span>Hoş Geldiniz ˅</span>
+            <span className="hidden sm:inline">Hoş Geldiniz ˅</span>
           </div>
         </div>
 
         {/* ORTA KISIM */}
-        <div className="flex-1 p-12 flex flex-col items-center relative z-10 overflow-y-auto">
+        <div className="flex-1 p-4 md:p-12 flex flex-col items-center relative z-10 overflow-y-auto">
           {children}
 
           {/* ARKA PLAN AĞAÇ SVG */}

@@ -24,6 +24,7 @@ export default function ResepsiyonShell({ children }: { children: React.ReactNod
   const [logoHata, setLogoHata]   = useState(false);
   const [agacHata, setAgacHata]   = useState(false);
   const [silHata,  setSilHata]    = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Geri butonuyla (bfcache) geldiginde sayfayi yenile ki yetki kontrolu (middleware) tekrar calissin
   useEffect(() => {
@@ -37,16 +38,26 @@ export default function ResepsiyonShell({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div className="flex min-h-screen relative">
+      
+      {/* MOBILE OVERLAY */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
       {/* SIDEBAR */}
-      <aside style={{
-        position: "fixed", left: 0, top: 0,
-        width: "240px", height: "100vh",
-        backgroundColor: SIDEBAR_BG,
-        display: "flex", flexDirection: "column",
-        zIndex: 30, overflow: "hidden",
-      }}>
+      <aside className={`fixed inset-y-0 left-0 w-[240px] z-50 flex flex-col overflow-hidden transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ backgroundColor: SIDEBAR_BG }}>
+        
+        {/* Mobil Kapat Butonu */}
+        <button 
+          className="absolute top-4 right-4 z-20 md:hidden text-white/70 hover:text-white"
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
 
         {/* Agac silueti arka plan */}
         {!agacHata && (
@@ -120,6 +131,7 @@ export default function ResepsiyonShell({ children }: { children: React.ReactNod
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setIsSidebarOpen(false)}
                 style={{
                   display: "flex", alignItems: "center", gap: "12px",
                   padding: "11px 14px",
@@ -160,54 +172,39 @@ export default function ResepsiyonShell({ children }: { children: React.ReactNod
       </aside>
 
       {/* ANA ICERIK */}
-      <div style={{ marginLeft: "240px", flex: 1, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-
+      <div className="flex-1 flex flex-col min-h-screen md:ml-[240px] w-full">
         {/* Topbar */}
-        <header style={{
-          position: "sticky", top: 0, zIndex: 20,
-          height: "58px",
-          backgroundColor: SIDEBAR_BG,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "0 28px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <i className="pi pi-building" style={{ color: "#4ade80", fontSize: "14px" }} />
-            <p style={{ color: "#86efac", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 600 }}>
-              Resepsiyon Paneli
-            </p>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
-              <div style={{
-                width: 30, height: 30, borderRadius: "50%",
-                backgroundColor: "#166534",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <i className="pi pi-user" style={{ color: "#fff", fontSize: "13px" }} />
-              </div>
-              <span style={{ color: "#fff", fontSize: "14px", fontWeight: 500 }}>{`Ho\u015f Geldiniz`}</span>
+        <header className="sticky top-0 z-20 h-[58px] flex items-center justify-between px-4 md:px-7 shadow-md" style={{ backgroundColor: SIDEBAR_BG }}>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden p-1.5 text-[#4ade80] hover:bg-white/10 rounded-md"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+            <div className="flex items-center gap-2">
+              <i className="pi pi-building text-[#4ade80] text-[13px] md:text-[14px]" />
+              <p className="text-[#86efac] text-[11px] md:text-[13px] uppercase tracking-widest font-semibold truncate max-w-[120px] md:max-w-none">
+                Resepsiyon Paneli
+              </p>
             </div>
-            <button onClick={() => signOut({ callbackUrl: "/" })} style={{
-              display: "flex", alignItems: "center", gap: "7px",
-              padding: "7px 14px", borderRadius: "8px",
-              border: "1px solid #166534",
-              backgroundColor: "transparent",
-              color: "#86efac", fontSize: "13px", cursor: "pointer",
-              fontWeight: 500,
-            }}>
-              <i className="pi pi-sign-out" style={{ fontSize: "12px" }} />
-              {`\u00c7\u0131k\u0131\u015f Yap`}
+          </div>
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-[26px] h-[26px] md:w-[30px] md:h-[30px] rounded-full bg-[#166534] flex items-center justify-center">
+                <i className="pi pi-user text-white text-[12px] md:text-[13px]" />
+              </div>
+              <span className="hidden sm:inline text-white text-[13px] md:text-[14px] font-medium">{`Ho\u015f Geldiniz`}</span>
+            </div>
+            <button onClick={() => signOut({ callbackUrl: "/" })} className="flex items-center gap-1.5 md:gap-2 px-2.5 py-1.5 md:px-3.5 md:py-1.5 rounded-lg border border-[#166534] bg-transparent text-[#86efac] text-[12px] md:text-[13px] font-medium cursor-pointer hover:bg-[#166534] transition-colors">
+              <i className="pi pi-sign-out text-[11px] md:text-[12px]" />
+              <span className="hidden xs:inline">{`\u00c7\u0131k\u0131\u015f Yap`}</span>
             </button>
           </div>
         </header>
 
         {/* Sayfa Icerigi */}
-        <main style={{
-          position: "relative", flex: 1,
-          backgroundColor: "#f8faf8", padding: "28px",
-          overflow: "hidden",
-        }}>
+        <main className="relative flex-1 bg-[#f8faf8] p-4 md:p-7 overflow-hidden">
           {/* Agac silueti arka plan - cok soluk */}
           {!silHata && (
             <div style={{
@@ -220,7 +217,7 @@ export default function ResepsiyonShell({ children }: { children: React.ReactNod
               opacity: 0.045,
             }} />
           )}
-          <div style={{ position: "relative", zIndex: 1 }}>
+          <div className="relative z-10 w-full overflow-x-auto pb-4">
             {children}
           </div>
         </main>
